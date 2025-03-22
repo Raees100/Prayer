@@ -26,7 +26,6 @@ C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets\msb
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.Prayer.props
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.Prayer.props
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets.pack.json
-C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\Prayer.csproj.Up2Date
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\Prayer.dll
 C:\Users\Classic\Source\Repos\Prayer\Prayer\obj\Debug\net9.0\refint\Prayer.dll
@@ -142,3 +141,5 @@ C:\Users\Classic\source\repos\Prayer\Prayer\bin\Debug\net9.0\ru\Microsoft.CodeAn
 C:\Users\Classic\source\repos\Prayer\Prayer\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\Users\Classic\source\repos\Prayer\Prayer\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\Users\Classic\source\repos\Prayer\Prayer\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+C:\Users\Classic\source\repos\Prayer\Prayer\bin\Debug\net9.0\appsettings.Production.json
+C:\Users\Classic\source\repos\Prayer\Prayer\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

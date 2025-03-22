@@ -1,1 +1,49 @@
-[]
+[
+  {
+    "ContainingType": "Prayer.Controllers.PrayerController",
+    "Method": "AddPrayer",
+    "RelativePath": "api/Prayer",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "prayer",
+        "Type": "Prayer.Models.PrayerRecord",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Prayer.Controllers.PrayerController",
+    "Method": "GetAllPrayers",
+    "RelativePath": "api/Prayer/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Prayer.Controllers.PrayerController",
+    "Method": "GetCalendar",
+    "RelativePath": "api/Prayer/calendar",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "year",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "month",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

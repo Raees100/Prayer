@@ -8,5 +8,5 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<Models.Prayer> Prayers => Set<Models.Prayer>();
+    public DbSet<Models.PrayerRecord> PrayerRecords => Set<Models.PrayerRecord>();
 }
