@@ -1,0 +1,6 @@
+@Prayer_HostAddress = http://localhost:5209
+
+GET {{Prayer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

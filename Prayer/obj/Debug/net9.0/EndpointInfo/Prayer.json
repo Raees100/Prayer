@@ -1,0 +1,9 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Prayer",
+    "version": "v1"
+  },
+  "paths": { },
+  "components": { }
+}
