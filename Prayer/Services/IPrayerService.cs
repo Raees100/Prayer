@@ -1,11 +1,14 @@
 ﻿using Prayer.Models;
 
-namespace Prayer.Services
+namespace Prayer.Services;
+
+public interface IPrayerService
 {
-    public interface IPrayerService
-    {
-        Task AddPrayerAsync(PrayerRecord prayer);
-        Task<List<PrayerRecord>> GetAllPrayersAsync();
-        Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month);
-    }
+    Task<string> AddPrayerAsync(PrayerRecord prayer);
+    Task<List<PrayerRecord>> GetAllPrayersAsync();
+    Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month);
+    Task<string> UpdatePrayerAsync(PrayerRecord prayer);
+    Task<string> DeletePrayerByDateAsync(DateTime prayerDate);
+
+
 }
