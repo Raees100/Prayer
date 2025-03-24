@@ -1,6 +1,6 @@
 ﻿using Prayer.Models;
 
-namespace Prayer.Repositories;
+namespace Prayer.Repositories.Interfaces;
 
 public interface IPrayerRepository
 {

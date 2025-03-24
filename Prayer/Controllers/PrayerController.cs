@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prayer.Models;
-using Prayer.Services;
+using Prayer.Services.Interfaces;
 
 namespace Prayer.Controllers;
 

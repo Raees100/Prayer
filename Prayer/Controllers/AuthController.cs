@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Prayer.Models;
+using Prayer.Services.Interfaces;
 
 namespace Prayer.Controllers;
 
@@ -9,10 +10,13 @@ namespace Prayer.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-
-    public AuthController(UserManager<ApplicationUser> userManager)
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ITokenService _tokenService;
+    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenService tokenService)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
+        _tokenService = tokenService;
     }
 
     // Signup - No Token generation here
@@ -37,4 +41,22 @@ public class AuthController : ControllerBase
 
         return BadRequest(result.Errors);
     }
+
+    // Login - Token generation here
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+            return Unauthorized(new { message = "Invalid email or password" });
+
+        var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+        if (!result.Succeeded)
+            return Unauthorized(new { message = "Invalid email or password" });
+
+        // ✅ Generate JWT Token
+        var token = _tokenService.CreateToken(user);
+        return Ok(new { token });
+    }
+
 }

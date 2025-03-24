@@ -12,7 +12,7 @@ using Prayer.Data;
 namespace Prayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250324104410_InitialMigration")]
+    [Migration("20250324204709_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />

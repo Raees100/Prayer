@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prayer.Data;
 using Prayer.Models;
+using Prayer.Repositories.Interfaces;
 
 namespace Prayer.Repositories;
 

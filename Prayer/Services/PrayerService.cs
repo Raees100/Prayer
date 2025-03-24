@@ -1,5 +1,6 @@
 ﻿using Prayer.Models;
-using Prayer.Repositories;
+using Prayer.Repositories.Interfaces;
+using Prayer.Services.Interfaces;
 
 namespace Prayer.Services;
 

@@ -1,6 +1,6 @@
 ﻿using Prayer.Models;
 
-namespace Prayer.Services;
+namespace Prayer.Services.Interfaces;
 
 public interface IPrayerService
 {
