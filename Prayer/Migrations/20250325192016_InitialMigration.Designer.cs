@@ -12,7 +12,7 @@ using Prayer.Data;
 namespace Prayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250324204709_InitialMigration")]
+    [Migration("20250325192016_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -259,6 +259,30 @@ namespace Prayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PrayerRecords");
+                });
+
+            modelBuilder.Entity("Prayer.Models.UserOtp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Otp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserOtps");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

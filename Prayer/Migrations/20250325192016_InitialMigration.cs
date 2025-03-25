@@ -71,6 +71,21 @@ namespace Prayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserOtps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Otp = table.Column<string>(type: "text", nullable: false),
+                    ExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserOtps", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -234,6 +249,9 @@ namespace Prayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "PrayerRecords");
+
+            migrationBuilder.DropTable(
+                name: "UserOtps");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

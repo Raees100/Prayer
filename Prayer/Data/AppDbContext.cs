@@ -11,4 +11,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<Models.PrayerRecord> PrayerRecords => Set<Models.PrayerRecord>();
+
+    // For OTP Storage
+    public DbSet<UserOtp> UserOtps => Set<UserOtp>();
 }

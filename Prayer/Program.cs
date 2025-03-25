@@ -10,6 +10,8 @@ using Prayer.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
 // Database and Identity
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -31,6 +33,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddScoped<IPrayerRepository, PrayerRepository>();
 builder.Services.AddScoped<IPrayerService, PrayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
