@@ -34,11 +34,9 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
     { id: 5, name: 'Esha', status: '', isCompleted: false },
   ]);
 
-  // Memoize the dates array
-  const datesArray = useMemo(() => {
+  const [datesArray, setDatesArray] = React.useState<DateItem[]>(() => {
     const dates = [];
     const baseDate = new Date();
-    // Add dates from 10 days ago to 10 days in future
     for (let i = -10; i <= 10; i++) {
       const date = new Date(baseDate);
       date.setDate(baseDate.getDate() + i);
@@ -48,40 +46,48 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
       });
     }
     return dates;
-  }, []); // Empty dependency array since we want this to be stable
+  });
 
   const navigateToCalendar = () => {
     navigation.navigate('Calendar', { currentDate });
   };
 
   const togglePrayer = (dateIndex: number, prayerId: number) => {
-    const prayers = datesArray[dateIndex].prayers;
-    const prayerIndex = prayers.findIndex(p => p.id === prayerId);
+    setDatesArray(prevDates => {
+      const newDates = [...prevDates];
+      const prayers = newDates[dateIndex].prayers;
+      const prayerIndex = prayers.findIndex(p => p.id === prayerId);
 
-    if (prayerIndex !== -1) {
-      prayers[prayerIndex] = {
-        ...prayers[prayerIndex],
-        isCompleted: !prayers[prayerIndex].isCompleted,
-        status: !prayers[prayerIndex].isCompleted ? prayers[prayerIndex].status : ''
-      };
-    }
+      if (prayerIndex !== -1) {
+        prayers[prayerIndex] = {
+          ...prayers[prayerIndex],
+          isCompleted: !prayers[prayerIndex].isCompleted,
+          status: !prayers[prayerIndex].isCompleted ? prayers[prayerIndex].status : ''
+        };
+      }
+      return newDates;
+    });
   };
 
   const updatePrayerStatus = (dateIndex: number, prayerId: number, newStatus: string) => {
-    const prayers = datesArray[dateIndex].prayers;
-    const prayerIndex = prayers.findIndex(p => p.id === prayerId);
+    setDatesArray(prevDates => {
+      const newDates = [...prevDates];
+      const prayers = newDates[dateIndex].prayers;
+      const prayerIndex = prayers.findIndex(p => p.id === prayerId);
 
-    if (prayerIndex !== -1) {
-      prayers[prayerIndex] = {
-        ...prayers[prayerIndex],
-        status: newStatus,
-        isCompleted: true
-      };
-    }
+      if (prayerIndex !== -1) {
+        prayers[prayerIndex] = {
+          ...prayers[prayerIndex],
+          status: newStatus,
+          isCompleted: true
+        };
+      }
+      return newDates;
+    });
   };
 
   const navigateToPrayerPage = (prayer: Prayer) => {
-    const screenName = prayer.name as keyof Omit<RootStackParamList, 'AllNamaz' | 'Calendar'>;
+    const screenName = prayer.name as 'Fajar' | 'Zuhr' | 'Asar' | 'Magrib' | 'Esha';
     navigation.navigate(screenName, {
       isCompleted: prayer.isCompleted,
       status: prayer.status,
@@ -94,17 +100,31 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
     const newDate = new Date(datesArray[index].date);
     setCurrentDate(newDate);
   }, [datesArray]);
-  const currentPrayer = useRef(0);
+
+  const currentDateIndex = useRef(10);
   const swipeLeft = Gesture.Fling()
     .direction(Directions.LEFT)
     .onEnd(() => {
-      navigateToPrayerPage(prayers[currentPrayer.current]); // Change to your screen name
+      const currentPrayers = datesArray[currentDateIndex.current].prayers;
+      const selectedPrayer = currentPrayers.find(p => p.isCompleted && p.status);
+      if (selectedPrayer) {
+        navigateToPrayerPage(selectedPrayer);
+      }
     });
-    const swipeRight = Gesture.Fling()
+
+  const swipeRight = Gesture.Fling()
     .direction(Directions.RIGHT)
     .onEnd(() => {
-      navigateToCalendar()
+      navigateToCalendar();
     });
+
+  const handleScrollEnd = useCallback((event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.y / height);
+    currentDateIndex.current = index;
+    const newDate = new Date(datesArray[index].date);
+    setCurrentDate(newDate);
+  }, [datesArray]);
+
   const renderPrayerScreen = ({ item, index }: { item: DateItem; index: number }) => {
     return (
       <GestureDetector gesture={Gesture.Race(swipeLeft, swipeRight)}>
@@ -156,7 +176,7 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
       snapToInterval={height}
       decelerationRate="fast"
-      onMomentumScrollEnd={handleScroll}
+      onMomentumScrollEnd={handleScrollEnd}
       initialScrollIndex={10}
       getItemLayout={(data, index) => ({
         length: height,
@@ -167,4 +187,4 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
   );
 };
 
-export default AllNamaz; 
+export default AllNamaz;

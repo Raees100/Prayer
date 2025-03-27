@@ -3,7 +3,10 @@ import PrayerStatusPage from '../../components/PrayerStatusPage';
 import { MagribScreenProps, RootStackParamList } from '../../navigation/types';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDate } from '../../context/DateContext';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Prayer {
   id: number;
@@ -14,7 +17,7 @@ interface Prayer {
 const MagribPage: React.FC<MagribScreenProps> = ({ route }) => {
   const { isCompleted, status } = route.params;
   const { currentDate, setCurrentDate } = useDate();
-    const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
      const [prayers] = React.useState<Prayer[]>([
         { id: 1, name: 'Fajar', status: '', isCompleted: false },
         { id: 2, name: 'Zuhr', status: '', isCompleted: false },
@@ -23,7 +26,7 @@ const MagribPage: React.FC<MagribScreenProps> = ({ route }) => {
         { id: 5, name: 'Esha', status: '', isCompleted: false },
       ]);
     const navigateToPrayerPage = (prayer: Prayer) => {
-        const screenName = prayer.name as keyof Omit<RootStackParamList, 'AllNamaz' | 'Calendar'>;
+        const screenName = prayer.name as 'Fajar' | 'Zuhr' | 'Asar' | 'Magrib' | 'Esha';
         navigation.navigate(screenName, {
           isCompleted: prayer.isCompleted,
           status: prayer.status,
@@ -48,4 +51,4 @@ const MagribPage: React.FC<MagribScreenProps> = ({ route }) => {
   );
 };
 
-export default MagribPage; 
+export default MagribPage;
