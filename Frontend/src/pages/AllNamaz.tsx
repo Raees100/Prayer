@@ -8,6 +8,7 @@ import { styles } from '../styles/styles';
 import { AllNamazScreenProps, RootStackParamList } from '../navigation/types';
 import { useDate } from '../context/DateContext';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useNamaz } from '../context/NamazContext';
 
 const { height } = Dimensions.get('window');
 
@@ -25,28 +26,8 @@ interface DateItem {
 
 const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
   const { currentDate, setCurrentDate } = useDate();
+  const { prayers, toggleCompletion, datesArray, setDatesArray, currentDateIndex, setCurrentDateIndex } = useNamaz();
   const flatListRef = useRef<FlatList>(null);
-  const [prayers] = React.useState<Prayer[]>([
-    { id: 1, name: 'Fajar', status: '', isCompleted: false },
-    { id: 2, name: 'Zuhr', status: '', isCompleted: false },
-    { id: 3, name: 'Asar', status: '', isCompleted: false },
-    { id: 4, name: 'Magrib', status: '', isCompleted: false },
-    { id: 5, name: 'Esha', status: '', isCompleted: false },
-  ]);
-
-  const [datesArray, setDatesArray] = React.useState<DateItem[]>(() => {
-    const dates = [];
-    const baseDate = new Date();
-    for (let i = -10; i <= 10; i++) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() + i);
-      dates.push({
-        date: new Date(date),
-        prayers: prayers.map(p => ({ ...p }))
-      });
-    }
-    return dates;
-  });
 
   const navigateToCalendar = () => {
     navigation.navigate('Calendar', { currentDate });
@@ -101,11 +82,11 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
     setCurrentDate(newDate);
   }, [datesArray]);
 
-  const currentDateIndex = useRef(10);
+  
   const swipeLeft = Gesture.Fling()
     .direction(Directions.LEFT)
     .onEnd(() => {
-      const currentPrayers = datesArray[currentDateIndex.current].prayers;
+      const currentPrayers = datesArray[currentDateIndex].prayers;
       const selectedPrayer = currentPrayers.find(p => p.isCompleted && p.status);
       if (selectedPrayer) {
         navigateToPrayerPage(selectedPrayer);
@@ -120,7 +101,7 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
 
   const handleScrollEnd = useCallback((event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / height);
-    currentDateIndex.current = index;
+    setCurrentDateIndex(()=>index);
     const newDate = new Date(datesArray[index].date);
     setCurrentDate(newDate);
   }, [datesArray]);

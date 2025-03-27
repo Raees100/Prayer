@@ -16,12 +16,14 @@ import EnterOTPPage from './src/pages/EnterOTPPage';
 import ResetPasswordPage from './src/pages/ResetPasswordPage';
 import { DateProvider } from './src/context/DateContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NamazProvider } from './src/context/NamazContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <NamazProvider>
     <DateProvider>
       <NavigationContainer>
         <Stack.Navigator
@@ -46,7 +48,9 @@ function App(): React.JSX.Element {
         </Stack.Navigator>
       </NavigationContainer>
     </DateProvider>
+    </NamazProvider>
     </GestureHandlerRootView>
+
   );
 }
 
