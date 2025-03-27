@@ -249,6 +249,10 @@ namespace Prayer.Migrations
                     b.Property<DateTime>("PrayerDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Zuhr")
                         .IsRequired()
                         .HasColumnType("text");

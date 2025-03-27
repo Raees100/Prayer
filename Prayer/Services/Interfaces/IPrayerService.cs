@@ -5,10 +5,8 @@ namespace Prayer.Services.Interfaces;
 public interface IPrayerService
 {
     Task<string> AddPrayerAsync(PrayerRecord prayer);
-    Task<List<PrayerRecord>> GetAllPrayersAsync();
-    Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month);
     Task<string> UpdatePrayerAsync(PrayerRecord prayer);
-    Task<string> DeletePrayerByDateAsync(DateTime prayerDate);
-
-
+    Task<PrayerRecord?> GetPrayerByDateAsync(string userId, DateTime prayerDate);
+    Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate);
+    Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate);
 }

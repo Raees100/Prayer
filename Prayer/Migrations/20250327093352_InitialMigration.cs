@@ -63,7 +63,8 @@ namespace Prayer.Migrations
                     Zuhr = table.Column<string>(type: "text", nullable: false),
                     Asar = table.Column<string>(type: "text", nullable: false),
                     Maghrib = table.Column<string>(type: "text", nullable: false),
-                    Esha = table.Column<string>(type: "text", nullable: false)
+                    Esha = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
