@@ -1,4 +1,5 @@
 ﻿using Prayer.Models;
+using Prayer.Repositories;
 using Prayer.Repositories.Interfaces;
 using Prayer.Services.Interfaces;
 
@@ -9,10 +10,14 @@ public class PrayerService : IPrayerService
     private readonly IPrayerRepository _repository;
     public PrayerService(IPrayerRepository repository) => _repository = repository;
 
+    public async Task<PrayerRecord?> GetPrayerByDateAsync(string userId, DateTime prayerDate)
+    {
+        return await _repository.GetPrayerByDateAsync(userId, prayerDate);
+    }
+
     public async Task<string> AddPrayerAsync(PrayerRecord prayer)
     {
-        // Check if record exists for the date
-        var existing = await _repository.GetPrayerByDateAsync(prayer.PrayerDate);
+        var existing = await _repository.GetPrayerByDateAsync(prayer.UserId, prayer.PrayerDate);
         if (existing != null)
         {
             return "Prayer record for this date already exists.";
@@ -22,27 +27,19 @@ public class PrayerService : IPrayerService
         return "Prayer Record Added Successfully";
     }
 
-    public async Task<List<PrayerRecord>> GetAllPrayersAsync() => await _repository.GetAllPrayersAsync();
-
-    public async Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month) =>
-        await _repository.GetPrayersByMonthAsync(year, month);
-
     public async Task<string> UpdatePrayerAsync(PrayerRecord prayer)
     {
-        var existing = await _repository.GetPrayerByDateAsync(prayer.PrayerDate);
-        if (existing == null)
-        {
-            return "No prayer record found for this date to update.";
-        }
-
-        await _repository.UpdatePrayerAsync(prayer);
-        return "Prayer Record Updated Successfully";
+        var isUpdated = await _repository.UpdatePrayerAsync(prayer);
+        return isUpdated ? "Prayer Record Updated Successfully" : "Failed to update prayer record.";
     }
 
-    public async Task<string> DeletePrayerByDateAsync(DateTime prayerDate)
+    public async Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
     {
-        var isDeleted = await _repository.DeletePrayerByDateAsync(prayerDate);
-        return isDeleted ? "Prayer Record Deleted Successfully" : "No prayer record found for this date.";
+        return await _repository.GetPrayerByTypeAsync(userId, prayerType, prayerDate);
     }
 
+    public async Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate)
+    {
+        return await _repository.GetPrayerRecordsForMonthAsync(userId, startDate, endDate);
+    }
 }

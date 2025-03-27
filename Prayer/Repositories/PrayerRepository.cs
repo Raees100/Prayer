@@ -16,47 +16,54 @@ public class PrayerRepository : IPrayerRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<PrayerRecord>> GetAllPrayersAsync() =>
-        await _context.PrayerRecords.ToListAsync();
-
-    public async Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month) =>
-        await _context.PrayerRecords
-            .Where(p => p.PrayerDate.Year == year && p.PrayerDate.Month == month)
-            .ToListAsync();
-
-    public async Task<PrayerRecord?> GetPrayerByDateAsync(DateTime prayerDate)
+    public async Task<PrayerRecord?> GetPrayerByDateAsync(string userId, DateTime prayerDate)
     {
         return await _context.PrayerRecords
-                             .FirstOrDefaultAsync(p => p.PrayerDate.Date == prayerDate.Date);
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.PrayerDate.Date == prayerDate.Date);
     }
-
-    public async Task UpdatePrayerAsync(PrayerRecord prayer)
+    public async Task<bool> UpdatePrayerAsync(PrayerRecord prayer)
     {
-        var existing = await _context.PrayerRecords
-                                     .FirstOrDefaultAsync(p => p.PrayerDate.Date == prayer.PrayerDate.Date);
-        if (existing != null)
+        try
         {
-            existing.Fajar = prayer.Fajar;
-            existing.Zuhr = prayer.Zuhr;
-            existing.Asar = prayer.Asar;
-            existing.Maghrib = prayer.Maghrib;
-            existing.Esha = prayer.Esha;
-
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task<bool> DeletePrayerByDateAsync(DateTime prayerDate)
-    {
-        var existing = await _context.PrayerRecords
-                                     .FirstOrDefaultAsync(p => p.PrayerDate.Date == prayerDate.Date);
-        if (existing != null)
-        {
-            _context.PrayerRecords.Remove(existing);
+            _context.PrayerRecords.Update(prayer);
             await _context.SaveChangesAsync();
             return true;
         }
-        return false;
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public async Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
+    {
+        prayerDate = DateTime.SpecifyKind(prayerDate, DateTimeKind.Utc);
+
+        var record = await _context.PrayerRecords
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.PrayerDate.Date == prayerDate.Date);
+
+        if (record == null)
+            return null;
+
+        return prayerType switch
+        {
+            "fajar" => record.Fajar.ToString(),
+            "zuhr" => record.Zuhr.ToString(),
+            "asar" => record.Asar.ToString(),
+            "maghrib" => record.Maghrib.ToString(),
+            "esha" => record.Esha.ToString(),
+            _ => null
+        };
+    }
+
+    public async Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate)
+    {
+        startDate = startDate.ToUniversalTime();
+        endDate = endDate.ToUniversalTime();
+
+        return await _context.PrayerRecords
+            .Where(p => p.UserId == userId && p.PrayerDate >= startDate && p.PrayerDate <= endDate)
+            .ToListAsync();
     }
 
 }

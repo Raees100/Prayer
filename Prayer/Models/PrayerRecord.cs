@@ -1,13 +1,32 @@
-﻿namespace Prayer.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Prayer.Models;
 
 public class PrayerRecord
 {
     public int Id { get; set; }
-    public DateTime PrayerDate { get; set; }  // e.g., "2024-07-27"
+    public DateTime PrayerDate { get; set; }
 
-    public string Fajar { get; set; }   // "OnTime", "Qaza", "Skipped"
-    public string Zuhr { get; set; }
-    public string Asar { get; set; }
-    public string Maghrib { get; set; }
-    public string Esha { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PrayerStatus Fajar { get; set; } = PrayerStatus.Skipped;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PrayerStatus Zuhr { get; set; } = PrayerStatus.Skipped;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PrayerStatus Asar { get; set; } = PrayerStatus.Skipped;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PrayerStatus Maghrib { get; set; } = PrayerStatus.Skipped;
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PrayerStatus Esha { get; set; } = PrayerStatus.Skipped;
+    public string UserId { get; set; }
+}
+
+public enum PrayerStatus
+{
+    Skipped = 0,
+    OnTime = 1,
+    Qaza = 2
 }

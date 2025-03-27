@@ -5,10 +5,8 @@ namespace Prayer.Repositories.Interfaces;
 public interface IPrayerRepository
 {
     Task AddPrayerAsync(PrayerRecord prayer);
-    Task<List<PrayerRecord>> GetAllPrayersAsync();
-    Task<List<PrayerRecord>> GetPrayersByMonthAsync(int year, int month);
-    Task<PrayerRecord?> GetPrayerByDateAsync(DateTime prayerDate);
-    Task UpdatePrayerAsync(PrayerRecord prayer);
-    Task<bool> DeletePrayerByDateAsync(DateTime prayerDate);
-
+    Task<PrayerRecord?> GetPrayerByDateAsync(string userId, DateTime prayerDate);
+    Task<bool> UpdatePrayerAsync(PrayerRecord prayer);
+    Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate);
+    Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate);
 }

@@ -12,7 +12,7 @@ using Prayer.Data;
 namespace Prayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250325192016_InitialMigration")]
+    [Migration("20250327093352_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -251,6 +251,10 @@ namespace Prayer.Migrations
 
                     b.Property<DateTime>("PrayerDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Zuhr")
                         .IsRequired()

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Prayer.Models;
 using Prayer.Services.Interfaces;
+using System.Security.Claims;
 
 namespace Prayer.Controllers;
 
@@ -17,6 +18,13 @@ public class PrayerController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddPrayer([FromBody] PrayerRecord prayer)
     {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "Unauthorized request" });
+
+        // UserId auto-assign
+        prayer.UserId = userId;
+
         // Ensure UTC before saving
         prayer.PrayerDate = DateTime.SpecifyKind(prayer.PrayerDate, DateTimeKind.Utc);
 
@@ -27,44 +35,117 @@ public class PrayerController : ControllerBase
         return Ok(new { message = result });
     }
 
-    // Fetch All Records (Optional)
-    [HttpGet("all")]
-    public async Task<IActionResult> GetAllPrayers() =>
-        Ok(await _service.GetAllPrayersAsync());
-
-    // Calendar View (Filter by Month & Year)
-    [HttpGet("calendar")]
-    public async Task<IActionResult> GetCalendar([FromQuery] int year, [FromQuery] int month)
-    {
-        var data = await _service.GetPrayersByMonthAsync(year, month);
-        return Ok(data);
-    }
-
     // Update Daily Prayer Record
     [HttpPut]
     public async Task<IActionResult> UpdatePrayer([FromBody] PrayerRecord prayer)
     {
-        // Ensure UTC before updating
-        prayer.PrayerDate = DateTime.SpecifyKind(prayer.PrayerDate, DateTimeKind.Utc);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "User not authorized" });
 
-        var result = await _service.UpdatePrayerAsync(prayer);
-        if (result.Contains("No prayer record"))
-            return NotFound(new { message = result });
+        // Get existing record from DB
+        var existingRecord = await _service.GetPrayerByDateAsync(userId, prayer.PrayerDate);
+        if (existingRecord == null)
+            return NotFound(new { message = "No prayer record found for this date." });
 
-        return Ok(new { message = result });
+        // Ensure user can update only their own record
+        if (existingRecord.UserId != userId)
+            return Forbid();
+
+        // Update only changed values
+        existingRecord.Fajar = prayer.Fajar;
+        existingRecord.Zuhr = prayer.Zuhr;
+        existingRecord.Asar = prayer.Asar;
+        existingRecord.Maghrib = prayer.Maghrib;
+        existingRecord.Esha = prayer.Esha;
+
+        var result = await _service.UpdatePrayerAsync(existingRecord);
+        if (result.Contains("Failed", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { message = "Failed to update prayer record." });
+
+        return Ok(new { message = "Prayer record updated successfully." });
     }
 
-    // Delete Daily Prayer Record by Date (Updated to handle UTC properly)
-    [HttpDelete]
-    public async Task<IActionResult> DeletePrayer([FromQuery] DateTime prayerDate)
+    [HttpGet("by-date/{prayerDate}")]
+    public async Task<IActionResult> GetPrayerByDate(DateTime prayerDate)
     {
-        // Convert incoming date to UTC to avoid PostgreSQL Kind mismatch
-        var utcDate = DateTime.SpecifyKind(prayerDate, DateTimeKind.Utc);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "User not authorized" });
 
-        var result = await _service.DeletePrayerByDateAsync(utcDate);
-        if (result.Contains("No prayer record"))
-            return NotFound(new { message = result });
+        // Convert date to UTC before querying
+        prayerDate = DateTime.SpecifyKind(prayerDate, DateTimeKind.Utc);
+        var record = await _service.GetPrayerByDateAsync(userId, prayerDate);
+        if (record == null)
+            return NotFound(new { message = "No prayer record found for this date." });
 
-        return Ok(new { message = result });
+        return Ok(record);
     }
+
+    [HttpGet("by-type/{prayerType}")]
+    public async Task<IActionResult> GetPrayerByType(string prayerType, [FromQuery] DateTime? date = null)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "User not authorized" });
+
+        var validPrayerTypes = new HashSet<string> { "fajar", "zuhr", "asar", "maghrib", "esha" };
+        prayerType = prayerType.ToLower();
+
+        if (!validPrayerTypes.Contains(prayerType))
+            return BadRequest(new { message = "Invalid prayer type. Valid values: Fajar, Zuhr, Asar, Maghrib, Esha." });
+
+        var prayerDate = date ?? DateTime.UtcNow.Date;
+
+        var status = await _service.GetPrayerByTypeAsync(userId, prayerType, prayerDate);
+        if (status == null)
+            return NotFound(new { message = $"No record found for {prayerType} on {prayerDate:yyyy-MM-dd}." });
+
+        return Ok(new { prayerType, date = prayerDate, status });
+    }
+
+    [HttpGet("calendar")]
+    public async Task<IActionResult> GetPrayerCalendar([FromQuery] int year, [FromQuery] int month)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "User not authorized" });
+
+        var startDate = new DateTime(year, month, 1);
+        var endDate = startDate.AddMonths(1).AddDays(-1);
+
+        var prayerRecords = await _service.GetPrayerRecordsForMonthAsync(userId, startDate, endDate);
+
+        var calendarData = new List<object>();
+
+        for (int day = 1; day <= endDate.Day; day++)
+        {
+            var currentDate = new DateTime(year, month, day);
+            var prayersForDay = prayerRecords.FirstOrDefault(p => p.PrayerDate.Date == currentDate);
+
+            if (prayersForDay == null)
+            {
+                // No prayers recorded for this date, return empty
+                calendarData.Add(new { date = currentDate, status = "" });
+            }
+            else
+            {
+                bool hasSkipped = prayersForDay.Fajar == PrayerStatus.Skipped ||
+                                  prayersForDay.Zuhr == PrayerStatus.Skipped ||
+                                  prayersForDay.Asar == PrayerStatus.Skipped ||
+                                  prayersForDay.Maghrib == PrayerStatus.Skipped ||
+                                  prayersForDay.Esha == PrayerStatus.Skipped;
+
+                calendarData.Add(new
+                {
+                    date = currentDate,
+                    status = hasSkipped ? "cross" : "tick"
+                });
+            }
+        }
+
+        return Ok(calendarData);
+    }
+
+
 }
