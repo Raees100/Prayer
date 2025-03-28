@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { authApi } from '../services/api';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
@@ -25,6 +26,9 @@ const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
     if (!email.trim()) {
       newErrors.email = 'Please enter your email';
       isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      isValid = false;
     }
 
     if (!password.trim()) {
@@ -36,14 +40,34 @@ const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
     return isValid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      setIsSubmitting(true);
-      // Add your login logic here
-      setTimeout(() => {
-        setIsSubmitting(false);
+      try {
+        setIsSubmitting(true);
+        const response = await authApi.login({
+          email: email.trim(),
+          password: password,
+        });
+        
+        // Store the token (you might want to use a secure storage solution)
+        // For now, we'll just navigate to the main screen
         navigation.navigate('AllNamaz');
-      }, 1500);
+      } catch (error: any) {
+        // Handle the error message from the backend
+        const errorMessage = error.message || 'Login failed. Please try again.';
+        
+        // Set error based on the type of error message
+        if (errorMessage.toLowerCase().includes('email')) {
+          setErrors(prev => ({ ...prev, email: errorMessage }));
+        } else if (errorMessage.toLowerCase().includes('password')) {
+          setErrors(prev => ({ ...prev, password: errorMessage }));
+        } else {
+          // If it's a general error, show it in the email field
+          setErrors(prev => ({ ...prev, email: errorMessage }));
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -71,7 +95,7 @@ const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <TextInput
           style={[styles.input, errors.email ? styles.inputError : null]}
-          placeholder="Lorem@gmail.com"
+          placeholder="Email"
           value={email}
           onChangeText={(text) => {
             setEmail(text);
@@ -288,4 +312,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignInPage; 
+export default SignInPage;
