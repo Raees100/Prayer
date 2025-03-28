@@ -34,7 +34,7 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
   };
 
   const togglePrayer = (dateIndex: number, prayerId: number) => {
-    setDatesArray(prevDates => {
+    setDatesArray((prevDates: DateItem[]) => {
       const newDates = [...prevDates];
       const prayers = newDates[dateIndex].prayers;
       const prayerIndex = prayers.findIndex(p => p.id === prayerId);
@@ -51,7 +51,7 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
   };
 
   const updatePrayerStatus = (dateIndex: number, prayerId: number, newStatus: string) => {
-    setDatesArray(prevDates => {
+    setDatesArray((prevDates: DateItem[]) => {
       const newDates = [...prevDates];
       const prayers = newDates[dateIndex].prayers;
       const prayerIndex = prayers.findIndex(p => p.id === prayerId);
@@ -116,14 +116,6 @@ const AllNamaz: React.FC<AllNamazScreenProps> = ({ navigation }) => {
               username="User name"
               subtitle="Lorem Ipsum"
               onMenuPress={() => { }}
-              rightComponent={
-                <TouchableOpacity
-                  onPress={navigateToCalendar}
-                  style={{ padding: 8 }}
-                >
-                  <Icon name="calendar-today" size={24} color="#000" />
-                </TouchableOpacity>
-              }
               currentDate={item.date}
             />
           </View>

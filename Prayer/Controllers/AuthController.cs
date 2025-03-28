@@ -29,6 +29,11 @@ public class AuthController : ControllerBase
     [HttpPost("signup")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).First().ErrorMessage });
+        }
+
         // Check if user already exists
         var existingUser = await _userManager.FindByEmailAsync(model.Email);
         if (existingUser != null)
@@ -43,9 +48,15 @@ public class AuthController : ControllerBase
 
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
+        {
+            // Send welcome email
+            await _emailService.SendWelcomeEmail(user.Email, user.Name);
             return Ok(new { message = "User registered successfully" });
+        }
 
-        return BadRequest(result.Errors);
+        // Return the first error message
+        var errorMessage = result.Errors.First().Description;
+        return BadRequest(new { message = errorMessage });
     }
 
     // Login - Token generation here

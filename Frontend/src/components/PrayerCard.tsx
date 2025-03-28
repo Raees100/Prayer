@@ -73,15 +73,6 @@ const PrayerCard: React.FC<PrayerCardProps> = ({
                 ({status})
               </Text>
             )}
-            <TouchableOpacity
-              onPress={onViewDetails}
-              style={{
-                padding: 4,
-                marginLeft: 4,
-              }}
-            >
-              <Text style={{ color: '#6B7280', fontSize: 14 }}>👁️</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>

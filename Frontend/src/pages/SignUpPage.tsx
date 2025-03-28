@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { authApi } from '../services/api';
 
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
@@ -9,9 +10,12 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     name: '',
+    email: '',
     password: '',
     terms: '',
   });
@@ -20,6 +24,7 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
     let isValid = true;
     const newErrors = {
       name: '',
+      email: '',
       password: '',
       terms: '',
     };
@@ -29,8 +34,19 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
       isValid = false;
     }
 
+    if (!email.trim()) {
+      newErrors.email = 'Please enter your email';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+      isValid = false;
+    }
+
     if (!password.trim()) {
       newErrors.password = 'Please enter your password';
+      isValid = false;
+    } else if (password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
       isValid = false;
     }
 
@@ -43,10 +59,35 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
     return isValid;
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (validateForm()) {
-      // Add your sign up logic here
-      console.log('Sign up successful');
+      try {
+        setIsSubmitting(true);
+        await authApi.register({
+          name: name.trim(),
+          email: email.trim(),
+          password: password,
+        });
+        // Registration successful, navigate to sign in
+        navigation.navigate('SignIn');
+      } catch (error: any) {
+        // Handle the error message from the backend
+        const errorMessage = error.message || 'Registration failed. Please try again.';
+        
+        // Set error based on the type of error message
+        if (errorMessage.toLowerCase().includes('email')) {
+          setErrors(prev => ({ ...prev, email: errorMessage }));
+        } else if (errorMessage.toLowerCase().includes('password')) {
+          setErrors(prev => ({ ...prev, password: errorMessage }));
+        } else if (errorMessage.toLowerCase().includes('name')) {
+          setErrors(prev => ({ ...prev, name: errorMessage }));
+        } else {
+          // If it's a general error, show it in the email field
+          setErrors(prev => ({ ...prev, email: errorMessage }));
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -80,6 +121,24 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
           placeholderTextColor="#8896AB"
         />
         {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, errors.email ? styles.inputError : null]}
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (errors.email) {
+              setErrors(prev => ({ ...prev, email: '' }));
+            }
+          }}
+          placeholderTextColor="#8896AB"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
       </View>
 
       <View style={styles.inputContainer}>
@@ -134,15 +193,23 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
 
       {/* Create Account Button */}
       <TouchableOpacity 
-        style={styles.button}
+        style={[styles.button, isSubmitting && styles.buttonDisabled]}
         onPress={handleSignUp}
+        disabled={isSubmitting}
       >
-        <Text style={styles.buttonText}>Create Account</Text>
+        {isSubmitting ? (
+          <View style={styles.submittingContainer}>
+            <ActivityIndicator color="#FFFFFF" size="small" />
+            <Text style={styles.buttonText}> Creating Account...</Text>
+          </View>
+        ) : (
+          <Text style={styles.buttonText}>Create Account</Text>
+        )}
       </TouchableOpacity>
 
       {/* Sign In Link */}
       <View style={styles.signInContainer}>
-        <Text style={styles.signInText}>Already have an account? Sign In? </Text>
+        <Text style={styles.signInText}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
           <Text style={styles.signInLink}>Sign In</Text>
         </TouchableOpacity>
@@ -269,10 +336,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: 40,
   },
+  buttonDisabled: {
+    backgroundColor: '#84D3A1',
+  },
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  submittingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   signInContainer: {
     flexDirection: 'row',
@@ -289,4 +363,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUpPage; 
+export default SignUpPage;

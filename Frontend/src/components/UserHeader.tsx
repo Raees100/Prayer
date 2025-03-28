@@ -5,7 +5,6 @@ interface UserHeaderProps {
   username: string;
   subtitle: string;
   onMenuPress: () => void;
-  rightComponent?: React.ReactNode;
   currentDate?: Date;
 }
 
@@ -13,7 +12,6 @@ const UserHeader: React.FC<UserHeaderProps> = ({
   username,
   subtitle,
   onMenuPress,
-  rightComponent,
   currentDate,
 }) => {
   const formattedDate = currentDate ? new Intl.DateTimeFormat('en-US', {
@@ -37,8 +35,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({
             <Text style={{ color: '#666666' }}>{subtitle}</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {rightComponent}
+        
           <TouchableOpacity
             onPress={onMenuPress}
             style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: '#E5E7EB' }}
@@ -49,7 +46,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({
               <View style={{ width: 20, height: 2, backgroundColor: '#000000', borderRadius: 1 }} />
             </View>
           </TouchableOpacity>
-        </View>
+
       </View>
       
       <View style={{ alignItems: 'center', marginTop: 50, marginBottom: -10 }}>
