@@ -17,6 +17,7 @@ import ResetPasswordPage from './src/pages/ResetPasswordPage';
 import { DateProvider } from './src/context/DateContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NamazProvider } from './src/context/NamazContext';
+import VerifyOTPPage from './src/pages/VerifyOTPPage';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,9 +35,9 @@ function App(): React.JSX.Element {
           }}
         >
           <Stack.Screen name="SignUp" component={SignUpPage} />
-          <Stack.Screen name="SignIn" component={SignInPage} />
+          <Stack.Screen name="Login" component={SignInPage} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
-          <Stack.Screen name="EnterOTP" component={EnterOTPPage} />
+          <Stack.Screen name="VerifyOTP" component={VerifyOTPPage} />
           <Stack.Screen name="ResetPassword" component={ResetPasswordPage} />
           <Stack.Screen name="AllNamaz" component={AllNamaz} />
           <Stack.Screen name="Calendar" component={CalendarPage} />

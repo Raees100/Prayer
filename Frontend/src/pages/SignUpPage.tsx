@@ -69,7 +69,9 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
           password: password,
         });
         // Registration successful, navigate to sign in
-        navigation.navigate('SignIn');
+        navigation.navigate('Login', {
+          message: 'Registration successful! Please log in.'
+        });
       } catch (error: any) {
         // Handle the error message from the backend
         const errorMessage = error.message || 'Registration failed. Please try again.';
@@ -210,7 +212,7 @@ const SignUpPage: React.FC<SignUpScreenProps> = ({ navigation }) => {
       {/* Sign In Link */}
       <View style={styles.signInContainer}>
         <Text style={styles.signInText}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login', {})}>
           <Text style={styles.signInLink}>Sign In</Text>
         </TouchableOpacity>
       </View>

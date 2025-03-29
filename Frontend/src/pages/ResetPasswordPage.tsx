@@ -46,7 +46,9 @@ const ResetPasswordPage: React.FC<ResetPasswordScreenProps> = ({ navigation }) =
       // Add your password reset logic here
       setTimeout(() => {
         setIsSubmitting(false);
-        navigation.navigate('SignIn');
+        navigation.navigate('Login', {
+          message: 'Password reset successfully. Please log in with your new password.',
+        }); // Navigate to login page after successful reset
       }, 2000);
     }
   };

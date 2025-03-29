@@ -1,39 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { authApi } from '../services/api';
 
-type ForgotPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'ForgotPassword'>;
+type ForgotPasswordScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 
-const ForgotPasswordPage: React.FC<ForgotPasswordScreenProps> = ({ navigation }) => {
+const ForgotPasswordPage: React.FC = () => {
+  const navigation = useNavigation<ForgotPasswordScreenNavigationProp>();
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const validateForm = () => {
-    if (!email.trim()) {
-      setError('Please enter your email');
-      return false;
-    }
-
-    // Basic email validation
+  const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-
-    return true;
+    return emailRegex.test(email);
   };
 
-  const handleContinue = () => {
-    if (validateForm()) {
-      setIsSubmitting(true);
-      // Add your forgot password logic here
-      setTimeout(() => {
-        setIsSubmitting(false);
-        navigation.navigate('EnterOTP');
-      }, 1000);
+  const handleForgotPassword = async () => {
+    try {
+      setError(null);
+      
+      if (!email) {
+        setError('Please enter your email address');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
+      setLoading(true);
+      await authApi.forgotPassword({ email });
+      
+      // Navigate to OTP verification page
+      navigation.navigate('VerifyOTP', { email });
+    } catch (err: any) {
+      setError(err.message || 'Failed to process request');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,24 +87,25 @@ const ForgotPasswordPage: React.FC<ForgotPasswordScreenProps> = ({ navigation })
           onChangeText={(text) => {
             setEmail(text);
             if (error) {
-              setError('');
+              setError(null);
             }
           }}
           placeholderTextColor="#8896AB"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoComplete="email"
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </View>
 
       {/* Continue Button */}
       <TouchableOpacity 
-        style={[styles.button, isSubmitting && styles.buttonDisabled]}
-        onPress={handleContinue}
-        disabled={isSubmitting}
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleForgotPassword}
+        disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {isSubmitting ? 'Sending...' : 'Continue'}
+          {loading ? 'Sending...' : 'Continue'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -205,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ForgotPasswordPage; 
+export default ForgotPasswordPage;

@@ -4,70 +4,60 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { authApi } from '../services/api';
 
-type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
+type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('');
+const SignInPage: React.FC<SignInScreenProps> = ({ navigation, route }) => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({
-    email: '',
-    password: '',
-  });
+  const [error, setError] = useState('');
 
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {
-      email: '',
-      password: '',
-    };
-
-    if (!email.trim()) {
-      newErrors.email = 'Please enter your email';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email address';
-      isValid = false;
+  // Show success message if coming from password reset
+  React.useEffect(() => {
+    if (route.params?.message) {
+      setTimeout(() => {
+        navigation.setParams({ message: undefined });
+      }, 5000);
     }
+  }, [route.params?.message]);
 
-    if (!password.trim()) {
-      newErrors.password = 'Please enter your password';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleLogin = async () => {
-    if (validateForm()) {
-      try {
-        setIsSubmitting(true);
-        const response = await authApi.login({
-          email: email.trim(),
-          password: password,
-        });
-        
-        // Store the token (you might want to use a secure storage solution)
-        // For now, we'll just navigate to the main screen
-        navigation.navigate('AllNamaz');
-      } catch (error: any) {
-        // Handle the error message from the backend
-        const errorMessage = error.message || 'Login failed. Please try again.';
-        
-        // Set error based on the type of error message
-        if (errorMessage.toLowerCase().includes('email')) {
-          setErrors(prev => ({ ...prev, email: errorMessage }));
-        } else if (errorMessage.toLowerCase().includes('password')) {
-          setErrors(prev => ({ ...prev, password: errorMessage }));
-        } else {
-          // If it's a general error, show it in the email field
-          setErrors(prev => ({ ...prev, email: errorMessage }));
-        }
-      } finally {
-        setIsSubmitting(false);
+    try {
+      setError('');
+
+      if (!email.trim()) {
+        setError('Please enter your email');
+        return;
       }
+
+      if (!validateEmail(email.trim())) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
+      if (!password) {
+        setError('Please enter your password');
+        return;
+      }
+
+      setIsSubmitting(true);
+      const response = await authApi.login({
+        email: email.trim(),
+        password: password
+      });
+
+      navigation.navigate('AllNamaz');
+      
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -91,36 +81,35 @@ const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
       <Text style={styles.title}>Sign In</Text>
       <Text style={styles.subtitle}>Login to your existing account</Text>
 
+      {route.params?.message && (
+        <Text style={styles.successMessage}>{route.params.message}</Text>
+      )}
+
       {/* Input Fields */}
       <View style={styles.inputContainer}>
         <TextInput
-          style={[styles.input, errors.email ? styles.inputError : null]}
-          placeholder="Email"
+          style={[styles.input, error ? styles.inputError : null]}
+          placeholder="Lorem@gmail.com"
           value={email}
           onChangeText={(text) => {
             setEmail(text);
-            if (errors.email) {
-              setErrors(prev => ({ ...prev, email: '' }));
-            }
+            setError('');
           }}
-          placeholderTextColor="#8896AB"
           keyboardType="email-address"
           autoCapitalize="none"
+          placeholderTextColor="#8896AB"
         />
-        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
       </View>
 
       <View style={styles.inputContainer}>
-        <View style={[styles.passwordContainer, errors.password ? styles.inputError : null]}>
+        <View style={[styles.passwordContainer, error ? styles.inputError : null]}>
           <TextInput
             style={styles.passwordInput}
             placeholder="Password"
             value={password}
             onChangeText={(text) => {
               setPassword(text);
-              if (errors.password) {
-                setErrors(prev => ({ ...prev, password: '' }));
-              }
+              setError('');
             }}
             secureTextEntry={!showPassword}
             placeholderTextColor="#8896AB"
@@ -138,8 +127,9 @@ const SignInPage: React.FC<SignInScreenProps> = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
-        {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
       </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       {/* Forgot Password */}
       <TouchableOpacity 
@@ -236,6 +226,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,
+    marginBottom: 16,
   },
   passwordContainer: {
     width: '100%',
@@ -259,6 +250,16 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
+  },
+  successMessage: {
+    color: '#059669',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+    backgroundColor: '#D1FAE5',
+    padding: 12,
+    borderRadius: 8,
+    width: '100%',
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
