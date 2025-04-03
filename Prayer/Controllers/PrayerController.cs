@@ -94,7 +94,9 @@ public class PrayerController : ControllerBase
         if (record == null)
             return NotFound(new { message = "No prayer record found for this date." });
 
-        return Ok(record);
+        var prayerResponse = record.MapToPrayerRecordResponse();
+
+        return Ok(prayerResponse);
     }
 
     [HttpGet("by-type/{prayerType}")]

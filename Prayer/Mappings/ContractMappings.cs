@@ -40,11 +40,11 @@ public static class ContractMappings
         {
             Id = prayerRecord.Id,
             PrayerDate = prayerRecord.PrayerDate,
-            Fajar = prayerRecord.Fajar,
-            Zuhr = prayerRecord.Zuhr,
-            Asar = prayerRecord.Asar,
-            Maghrib = prayerRecord.Maghrib,
-            Esha = prayerRecord.Esha
+            Fajar = prayerRecord.Fajar.ToString(),
+            Zuhr = prayerRecord.Zuhr.ToString(),
+            Asar = prayerRecord.Asar.ToString(),
+            Maghrib = prayerRecord.Maghrib.ToString(),
+            Esha = prayerRecord.Esha.ToString()
         };
     }
 }
