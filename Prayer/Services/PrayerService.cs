@@ -42,4 +42,10 @@ public class PrayerService : IPrayerService
     {
         return await _repository.GetPrayerRecordsForMonthAsync(userId, startDate, endDate);
     }
+
+    public async Task<List<PrayerRecord>> GetAllPrayersAsync(string userId)
+    {
+        return await _repository.GetAllPrayersAsync(userId);
+    }
+
 }

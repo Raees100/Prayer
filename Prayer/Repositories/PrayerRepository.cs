@@ -66,4 +66,12 @@ public class PrayerRepository : IPrayerRepository
             .ToListAsync();
     }
 
+    public async Task<List<PrayerRecord>> GetAllPrayersAsync(string userId)
+    {
+        return await _context.PrayerRecords
+            .Where(p => p.UserId == userId)
+            .OrderByDescending(p => p.PrayerDate) // Show most recent first
+            .ToListAsync();
+    }
+
 }

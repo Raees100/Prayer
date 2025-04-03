@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Prayer.Contracts.Requests;
+using Prayer.Mappings;
 using Prayer.Models;
 using Prayer.Services.Interfaces;
 using System.Security.Claims;
@@ -16,35 +18,33 @@ public class PrayerController : ControllerBase
 
     // Add Daily Prayer Record
     [HttpPost]
-    public async Task<IActionResult> AddPrayer([FromBody] PrayerRecord prayer)
+    public async Task<IActionResult> AddPrayer([FromBody] CreatePrayerRequest request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { message = "Unauthorized request" });
 
-        // UserId auto-assign
-        prayer.UserId = userId;
+        // Map request to PrayerRecord
+        var prayerRecord = request.MapToPrayerRecord(userId);
 
-        // Ensure UTC before saving
-        prayer.PrayerDate = DateTime.SpecifyKind(prayer.PrayerDate, DateTimeKind.Utc);
-
-        var result = await _service.AddPrayerAsync(prayer);
+        var result = await _service.AddPrayerAsync(prayerRecord);
         if (result.Contains("already exists"))
             return BadRequest(new { message = result });
 
         return Ok(new { message = result });
     }
 
+
     // Update Daily Prayer Record
     [HttpPut]
-    public async Task<IActionResult> UpdatePrayer([FromBody] PrayerRecord prayer)
+    public async Task<IActionResult> UpdatePrayer([FromBody] UpdatePrayerRequest request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { message = "User not authorized" });
 
         // Get existing record from DB
-        var existingRecord = await _service.GetPrayerByDateAsync(userId, prayer.PrayerDate);
+        var existingRecord = await _service.GetPrayerByDateAsync(userId, request.PrayerDate);
         if (existingRecord == null)
             return NotFound(new { message = "No prayer record found for this date." });
 
@@ -52,12 +52,8 @@ public class PrayerController : ControllerBase
         if (existingRecord.UserId != userId)
             return Forbid();
 
-        // Update only changed values
-        existingRecord.Fajar = prayer.Fajar;
-        existingRecord.Zuhr = prayer.Zuhr;
-        existingRecord.Asar = prayer.Asar;
-        existingRecord.Maghrib = prayer.Maghrib;
-        existingRecord.Esha = prayer.Esha;
+        // Map incoming request to existing record
+        existingRecord = request.MapToPrayerRecord(userId);
 
         var result = await _service.UpdatePrayerAsync(existingRecord);
         if (result.Contains("Failed", StringComparison.OrdinalIgnoreCase))
@@ -65,6 +61,25 @@ public class PrayerController : ControllerBase
 
         return Ok(new { message = "Prayer record updated successfully." });
     }
+
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllPrayers()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "User not authorized" });
+
+        var allPrayers = await _service.GetAllPrayersAsync(userId);
+
+        if (allPrayers == null || !allPrayers.Any())
+            return NotFound(new { message = "No prayer records found for this user." });
+
+        var prayerResponses = allPrayers.Select(prayer => prayer.MapToPrayerRecordResponse()).ToList();
+
+        return Ok(prayerResponses);
+    }
+
 
     [HttpGet("by-date/{prayerDate}")]
     public async Task<IActionResult> GetPrayerByDate(DateTime prayerDate)

@@ -9,4 +9,6 @@ public interface IPrayerRepository
     Task<bool> UpdatePrayerAsync(PrayerRecord prayer);
     Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate);
     Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate);
+    Task<List<PrayerRecord>> GetAllPrayersAsync(string userId);
+
 }
