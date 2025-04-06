@@ -24,100 +24,73 @@ const AllNamaz = () => {
     { id: 'maghrib', name: 'Maghrib', isCompleted: false, status: '' },
     { id: 'esha', name: 'Esha', isCompleted: false, status: '' },
   ]);
-  
 
   const togglePrayerCompletion = async (prayerId: string) => {
     const updatedPrayers = prayers.map((prayer) => {
       if (prayer.id === prayerId) {
-        // Toggle completion status for the specific prayer
         const updatedPrayer = { ...prayer, isCompleted: !prayer.isCompleted };
-  
-        // Update the status based on isCompleted
         const updatedStatus = updatedPrayer.isCompleted ? 'completed' : 'pending';
-        updatedPrayer.status = updatedStatus; // Ensure correct status is set
-  
-        // Create the prayer record for all prayers with updated status
+        updatedPrayer.status = updatedStatus;
+
         const prayerData: PrayerRecord = {
-          prayerDate: currentDate, // Correct format of the prayer date
-          fajar: prayers[0].status, // Status for Fajar prayer
-          zuhr: prayers[1].status,  // Status for Zuhr prayer
-          asar: prayers[2].status,  // Status for Asar prayer
-          maghrib: prayers[3].status, // Status for Maghrib prayer
-          esha: prayers[4].status,  // Status for Esha prayer
-          userId: 'userId', // Replace with actual user ID if needed
+          prayerDate: currentDate,
+          fajar: prayers[0].status,
+          zuhr: prayers[1].status,
+          asar: prayers[2].status,
+          maghrib: prayers[3].status,
+          esha: prayers[4].status,
+          userId: 'userId',
         };
-  
-        console.log('Sending data to add/update prayer:', prayerData);
-  
-        // API call to add prayer if the prayer is marked as completed
+
         if (updatedPrayer.isCompleted) {
-          prayerApi
-            .addPrayer(prayerData)
-            .then((response) => {
-              console.log('Prayer added successfully:', response);
-            })
-            .catch((error) => {
-              console.error('Error adding prayer:', error.response?.data || error.message);
-            });
+          prayerApi.addPrayer(prayerData).then((response) => {
+            console.log('Prayer added successfully:', response);
+          }).catch((error) => {
+            console.error('Error adding prayer:', error.response?.data || error.message);
+          });
         } else {
-          // API call to update prayer if the prayer is not completed
-          prayerApi
-            .updatePrayer(prayerData)
-            .then((response) => {
-              console.log('Prayer updated successfully:', response);
-            })
-            .catch((error) => {
-              console.error('Error updating prayer:', error.response?.data || error.message);
-            });
+          prayerApi.updatePrayer(prayerData).then((response) => {
+            console.log('Prayer updated successfully:', response);
+          }).catch((error) => {
+            console.error('Error updating prayer:', error.response?.data || error.message);
+          });
         }
-  
+
         return updatedPrayer;
       }
       return prayer;
     });
-  
+
     setPrayers(updatedPrayers);
   };
 
-  const updatePrayerStatus = async (prayerId: string, newStatus: string) => {
-    // Update the prayer state with the new status
-    const updatedPrayers = prayers.map((prayer) => {
-      if (prayer.id === prayerId) {
-        const updatedPrayer = { ...prayer, status: newStatus, isCompleted: true };
-  
-        // Ensure the prayer record matches what the API expects
-        const prayerRecord = {
-          prayerDate: currentDate, // Correct format of the prayer date
-          fajar: prayers[0].status, // Status for Fajar prayer
-          zuhr: prayers[1].status,  // Status for Zuhr prayer
-          asar: prayers[2].status,  // Status for Asar prayer
-          maghrib: prayers[3].status, // Status for Maghrib prayer
-          esha: prayers[4].status,  // Status for Esha prayer
-          userId: 'userId', // Replace with actual user ID if needed
-        };
-  
-        // API call to update prayer
-        prayerApi
-          .updatePrayer(prayerRecord)
-          .then((response) => {
-            console.log('Prayer updated successfully:', response);
-          })
-          .catch((error) => {
-            console.error('Error updating prayer:', error.response?.data || error.message);
-          });
-  
-        return updatedPrayer;
-      }
-      return prayer;
-    });
-  
-    // Update the state with the new prayer statuses
-    setPrayers(updatedPrayers);
+  // Function to handle the Add button press
+  const handleAddPrayer = async () => {
+    // Create a new prayer record to be added
+    const newPrayerData: PrayerRecord = {
+      prayerDate: currentDate,
+      fajar: 'skipped', // Initial status can be 'pending'
+      zuhr: 'skipped',
+      asar: 'skipped',
+      maghrib: 'skipped',
+      esha: 'skipped',
+      userId: 'userId', // Replace with actual user ID if needed
+    };
+
+    // Call the API to add the new prayer
+    prayerApi.addPrayer(newPrayerData)
+      .then((response) => {
+        console.log('New prayer added successfully:', response);
+        // You can update the state if needed to reflect the new prayer
+        setPrayers((prevPrayers) => [
+          ...prevPrayers,
+          { id: 'newId', name: 'New Prayer', isCompleted: false, status: 'pending' },
+        ]);
+      })
+      .catch((error) => {
+        console.error('Error adding new prayer:', error.response?.data || error.message);
+      });
   };
-  
-  
-  
-  
 
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
     console.log("Swiped left");
@@ -139,26 +112,35 @@ const AllNamaz = () => {
         />
         <Image source={require('../assets/images/cute-boy-moslem-prayer-cartoon.png')} style={styles.image} />
         <View style={styles.container}>
-        <FlatList
-          data={prayers}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PrayerCard
-              name={item.name}
-              status={item.status}
-              isCompleted={item.isCompleted}
-              onPress={() => togglePrayerCompletion(item.id)}
-              onStatusChange={(newStatus) => updatePrayerStatus(item.id, newStatus)}
-              onViewDetails={() => {}}
-            />
-          )}
-          contentContainerStyle={styles.listContainer}
-        />
+          <FlatList
+            data={prayers}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <PrayerCard
+                name={item.name}
+                status={item.status}
+                isCompleted={item.isCompleted}
+                onPress={() => togglePrayerCompletion(item.id)}
+                onStatusChange={(newStatus) => {}}
+                onViewDetails={() => {}}
+              />
+            )}
+            contentContainerStyle={styles.listContainer}
+          />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={() => console.log('Edit button pressed')}>
+              <Text style={styles.buttonText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleAddPrayer}>
+              <Text style={styles.buttonText}>Add</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </GestureDetector>
   );
 };
+
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -167,7 +149,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    marginTop: 70,
+    marginTop: 40,
   },
   listContainer: {
     padding: 16,
@@ -177,6 +159,26 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'contain',
     marginTop: 50,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 90,
+    paddingVertical: 50,
+    marginTop: -40,
+  },
+  button: {
+    backgroundColor: 'green',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    width: '40%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
