@@ -75,7 +75,7 @@ const VerifyOTPPage: React.FC = () => {
       }
 
       setLoading(true);
-      await authApi.verifyOTP({ email, otp: otpString });
+      await authApi.verifyOTP({ email: email as string, otp: otpString });
       
       // Navigate to reset password page
       router.push({pathname:'/ResetPasswordPage', params: {email, otp: otpString }});
@@ -90,7 +90,11 @@ const VerifyOTPPage: React.FC = () => {
     try {
       setError(null);
       setLoading(true);
-      await authApi.forgotPassword({ email });
+      if (typeof email === 'string') {
+        await authApi.forgotPassword({ email });
+      } else {
+        setError('Invalid email format');
+      }
       setResendTimer(120); // Start 2-minute countdown
       setOtpExpiryTimer(300); // Reset 5-minute expiry timer
     } catch (err: any) {

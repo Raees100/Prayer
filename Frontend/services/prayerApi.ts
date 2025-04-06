@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Platform } from 'react-native';
 
@@ -15,8 +16,8 @@ const api = axios.create({
 });
 
 // Add token to requests
-api.interceptors.request.use((config: any) => {
-  const token = localStorage.getItem('token');
+api.interceptors.request.use(async (config: any) => {
+  const token = await AsyncStorage.getItem('userToken'); // Assuming you have a method to get the token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -43,6 +44,7 @@ export interface PrayerRecord {
   asar: string;
   maghrib: string;
   esha: string;
+  userId: string;
 }
 
 export interface PrayerResponse {
@@ -55,16 +57,26 @@ export const prayerApi = {
   // Get prayer record for a specific date
   getPrayerByDate: async (date: Date) => {
     try {
-      const response = await api.get(`/prayer/by-date/${date.toISOString()}`);
+      // Format the date as yyyy-MM-dd for consistent handling
+      const formattedDate = date.toISOString().split('T')[0]; // Get the date part in YYYY-MM-DD format
+      console.log('Formatted Date:', formattedDate); // Debugging log
+      // Send the GET request with the formatted date
+      const response = await api.get(`/prayer/by-date/${formattedDate}`);
+      
       return response.data;
     } catch (error: any) {
+      // Handle 404 - No prayer record found
       if (error.response?.status === 404) {
         return null; // No prayer record found for this date
       }
+      
+      // Handle any specific error message returned from the backend
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error(error.response?.status);
+      
+      // General error handling for other status codes
+      throw new Error(`Error: ${error.response?.status || 'Unknown error'}`);
     }
   },
 

@@ -1,184 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
-import { prayerApi, PrayerRecord } from '../services/prayerApi';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text, Image, Dimensions } from 'react-native';
 import UserHeader from '../components/UserHeader';
 import PrayerCard from '../components/PrayerCard';
-import { useNavigation } from 'expo-router';
+import { router } from 'expo-router';
+import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { prayerApi, PrayerRecord } from '@/services/prayerApi';
+
+const { height } = Dimensions.get('window');
 
 interface Prayer {
   id: string;
   name: string;
-  time: string;
   isCompleted: boolean;
   status: string;
 }
 
-interface DateItem {
-  date: Date;
-  isSelected: boolean;
-}
-
-const AllNamaz: React.FC = () => {
-  const navigation = useNavigation();
+const AllNamaz = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [prayers, setPrayers] = useState<Prayer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadPrayers();
-  }, [currentDate]);
-
-  const loadPrayers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Get prayer record for current date
-      const prayerRecord = await prayerApi.getPrayerByDate(currentDate);
-      
-      if (prayerRecord) {
-        // Convert backend data to frontend format
-        const formattedPrayers: Prayer[] = [
-          { id: 'fajar', name: 'Fajar', time: prayerRecord.fajar, isCompleted: false, status: '' },
-          { id: 'zuhr', name: 'Zuhr', time: prayerRecord.zuhr, isCompleted: false, status: '' },
-          { id: 'asar', name: 'Asar', time: prayerRecord.asar, isCompleted: false, status: '' },
-          { id: 'maghrib', name: 'Maghrib', time: prayerRecord.maghrib, isCompleted: false, status: '' },
-          { id: 'esha', name: 'Esha', time: prayerRecord.esha, isCompleted: false, status: '' },
-        ];
-
-        // Get completion status for each prayer
-        for (const prayer of formattedPrayers) {
-          const status = await prayerApi.getPrayerByType(prayer.id, currentDate);
-          if (status) {
-            prayer.isCompleted = status.status === 'Completed';
-            prayer.status = status.status;
-          }
-        }
-
-        setPrayers(formattedPrayers);
-      } else {
-        // If no record exists, create default prayers
-        setPrayers([
-          { id: 'fajar', name: 'Fajar', time: '5:30 AM', isCompleted: false, status: '' },
-          { id: 'zuhr', name: 'Zuhr', time: '1:30 PM', isCompleted: false, status: '' },
-          { id: 'asar', name: 'Asar', time: '4:30 PM', isCompleted: false, status: '' },
-          { id: 'maghrib', name: 'Maghrib', time: '7:30 PM', isCompleted: false, status: '' },
-          { id: 'esha', name: 'Esha', time: '9:30 PM', isCompleted: false, status: '' },
-        ]);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load prayers');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [prayers, setPrayers] = useState<Prayer[]>([
+    { id: 'fajar', name: 'Fajar', isCompleted: false, status: '' },
+    { id: 'zuhr', name: 'Zuhr', isCompleted: false, status: '' },
+    { id: 'asar', name: 'Asar', isCompleted: false, status: '' },
+    { id: 'maghrib', name: 'Maghrib', isCompleted: false, status: '' },
+    { id: 'esha', name: 'Esha', isCompleted: false, status: '' },
+  ]);
+  
 
   const togglePrayerCompletion = async (prayerId: string) => {
-    try {
-      const updatedPrayers = prayers.map(prayer => {
-        if (prayer.id === prayerId) {
-          return { ...prayer, isCompleted: !prayer.isCompleted };
-        }
-        return prayer;
-      });
-      setPrayers(updatedPrayers);
-
-      // Update backend
-      const prayer = prayers.find(p => p.id === prayerId);
-      if (prayer) {
-        const prayerRecord: PrayerRecord = {
-          prayerDate: currentDate,
-          fajar: prayers.find(p => p.id === 'fajar')?.time || '',
-          zuhr: prayers.find(p => p.id === 'zuhr')?.time || '',
-          asar: prayers.find(p => p.id === 'asar')?.time || '',
-          maghrib: prayers.find(p => p.id === 'maghrib')?.time || '',
-          esha: prayers.find(p => p.id === 'esha')?.time || '',
+    const updatedPrayers = prayers.map((prayer) => {
+      if (prayer.id === prayerId) {
+        // Toggle completion status for the specific prayer
+        const updatedPrayer = { ...prayer, isCompleted: !prayer.isCompleted };
+  
+        // Update the status based on isCompleted
+        const updatedStatus = updatedPrayer.isCompleted ? 'completed' : 'pending';
+        updatedPrayer.status = updatedStatus; // Ensure correct status is set
+  
+        // Create the prayer record for all prayers with updated status
+        const prayerData: PrayerRecord = {
+          prayerDate: currentDate, // Correct format of the prayer date
+          fajar: prayers[0].status, // Status for Fajar prayer
+          zuhr: prayers[1].status,  // Status for Zuhr prayer
+          asar: prayers[2].status,  // Status for Asar prayer
+          maghrib: prayers[3].status, // Status for Maghrib prayer
+          esha: prayers[4].status,  // Status for Esha prayer
+          userId: 'userId', // Replace with actual user ID if needed
         };
-
-        await prayerApi.updatePrayer(prayerRecord);
+  
+        console.log('Sending data to add/update prayer:', prayerData);
+  
+        // API call to add prayer if the prayer is marked as completed
+        if (updatedPrayer.isCompleted) {
+          prayerApi
+            .addPrayer(prayerData)
+            .then((response) => {
+              console.log('Prayer added successfully:', response);
+            })
+            .catch((error) => {
+              console.error('Error adding prayer:', error.response?.data || error.message);
+            });
+        } else {
+          // API call to update prayer if the prayer is not completed
+          prayerApi
+            .updatePrayer(prayerData)
+            .then((response) => {
+              console.log('Prayer updated successfully:', response);
+            })
+            .catch((error) => {
+              console.error('Error updating prayer:', error.response?.data || error.message);
+            });
+        }
+  
+        return updatedPrayer;
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update prayer status');
-      // Revert the UI state on error
-      loadPrayers();
-    }
+      return prayer;
+    });
+  
+    setPrayers(updatedPrayers);
   };
 
   const updatePrayerStatus = async (prayerId: string, newStatus: string) => {
-    try {
-      const updatedPrayers = prayers.map(prayer => {
-        if (prayer.id === prayerId) {
-          return { ...prayer, status: newStatus, isCompleted: true };
-        }
-        return prayer;
-      });
-      setPrayers(updatedPrayers);
-
-      // Update backend
-      const prayer = prayers.find(p => p.id === prayerId);
-      if (prayer) {
-        const prayerRecord: PrayerRecord = {
-          prayerDate: currentDate,
-          fajar: prayers.find(p => p.id === 'fajar')?.time || '',
-          zuhr: prayers.find(p => p.id === 'zuhr')?.time || '',
-          asar: prayers.find(p => p.id === 'asar')?.time || '',
-          maghrib: prayers.find(p => p.id === 'maghrib')?.time || '',
-          esha: prayers.find(p => p.id === 'esha')?.time || '',
+    // Update the prayer state with the new status
+    const updatedPrayers = prayers.map((prayer) => {
+      if (prayer.id === prayerId) {
+        const updatedPrayer = { ...prayer, status: newStatus, isCompleted: true };
+  
+        // Ensure the prayer record matches what the API expects
+        const prayerRecord = {
+          prayerDate: currentDate, // Correct format of the prayer date
+          fajar: prayers[0].status, // Status for Fajar prayer
+          zuhr: prayers[1].status,  // Status for Zuhr prayer
+          asar: prayers[2].status,  // Status for Asar prayer
+          maghrib: prayers[3].status, // Status for Maghrib prayer
+          esha: prayers[4].status,  // Status for Esha prayer
+          userId: 'userId', // Replace with actual user ID if needed
         };
-
-        await prayerApi.updatePrayer(prayerRecord);
+  
+        // API call to update prayer
+        prayerApi
+          .updatePrayer(prayerRecord)
+          .then((response) => {
+            console.log('Prayer updated successfully:', response);
+          })
+          .catch((error) => {
+            console.error('Error updating prayer:', error.response?.data || error.message);
+          });
+  
+        return updatedPrayer;
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update prayer status');
-      // Revert the UI state on error
-      loadPrayers();
-    }
+      return prayer;
+    });
+  
+    // Update the state with the new prayer statuses
+    setPrayers(updatedPrayers);
   };
+  
+  
+  
+  
 
-  const renderPrayerScreen = () => (
-    <View style={styles.container}>
-      <FlatList
-        data={prayers}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <PrayerCard
-            name={item.name}
-            status={item.status}
-            isCompleted={item.isCompleted}
-            onPress={() => togglePrayerCompletion(item.id)}
-            onStatusChange={(newStatus) => updatePrayerStatus(item.id, newStatus)}
-            onViewDetails={() => {}}
-          />
-        )}
-        contentContainerStyle={styles.listContainer}
-      />
-    </View>
-  );
+  const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
+    console.log("Swiped left");
+  });
+
+  const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
+    console.log("Swiped Right");
+    router.push('/CalendarPage');
+  });
 
   return (
-    <View style={styles.mainContainer}>
-      <UserHeader
-        username="User Name"
-        subtitle="Welcome back!"
-        onMenuPress={() => {}}
-        currentDate={currentDate}
-      />
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text>Loading prayers...</Text>
+    <GestureDetector gesture={Gesture.Race(swipeLeft, swipeRight)}>
+      <View style={styles.mainContainer}>
+        <UserHeader
+          username="User Name"
+          subtitle="Welcome back!"
+          onMenuPress={() => {}}
+          currentDate={currentDate}
+        />
+        <Image source={require('../assets/images/cute-boy-moslem-prayer-cartoon.png')} style={styles.image} />
+        <View style={styles.container}>
+        <FlatList
+          data={prayers}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <PrayerCard
+              name={item.name}
+              status={item.status}
+              isCompleted={item.isCompleted}
+              onPress={() => togglePrayerCompletion(item.id)}
+              onStatusChange={(newStatus) => updatePrayerStatus(item.id, newStatus)}
+              onViewDetails={() => {}}
+            />
+          )}
+          contentContainerStyle={styles.listContainer}
+        />
         </View>
-      ) : error ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadPrayers}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        renderPrayerScreen()
-      )}
-    </View>
+      </View>
+    </GestureDetector>
   );
 };
 
@@ -189,35 +167,16 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    marginTop: 70,
   },
   listContainer: {
     padding: 16,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginTop: 50,
   },
 });
 

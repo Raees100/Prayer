@@ -1,8 +1,11 @@
-import { router } from 'expo-router';
+import { authApi } from '@/services/api';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+
 
 const ResetPasswordPage = () => {
+  const { email, otp } = useLocalSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -37,22 +40,31 @@ const ResetPasswordPage = () => {
     return isValid;
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      setIsSubmitting(true);
-      // Add your password reset logic here
-      setTimeout(() => {
-        setIsSubmitting(false);
-        router.push({
-          pathname: '/SignInPage',
-          params: {
-            message: 'Password reset successfully. Please log in with your new password.',
-          }
-        }); // Navigate to login page after successful reset
-      }, 2000);
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const resetPasswordData = { Password: password, ConfirmPassword: confirmPassword }; 
+ console.log(resetPasswordData, 'resetPasswordData');
+      const response = await authApi.resetPassword(
+        email?email.toString():'', 
+        resetPasswordData
+      );
+      console.log(response, 'Response from password reset API');
+      if (response.status === 200) {
+        Alert.alert('Success', 'Password reset successfully. Please log in.');
+        router.push('/SignInPage');
+      } else {
+        throw new Error(response.data.message || 'Something went wrong');
+      }
+    } catch (error) {
+      const errorMessage = (error as Error).message || 'Something went wrong.';
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
   return (
     <View style={styles.container}>
       {/* Back Button */}

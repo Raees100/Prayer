@@ -46,7 +46,7 @@ const PrayerCard: React.FC<PrayerCardProps> = ({
           alignItems: 'center',
           gap: 8,
           flex: 1,
-          marginLeft: 4
+          marginLeft: 5
         }}
       >
         <View

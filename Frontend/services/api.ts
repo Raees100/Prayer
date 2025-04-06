@@ -37,9 +37,8 @@ export interface VerifyOTPData {
 }
 
 export interface ResetPasswordData {
-  email: string;
-  otp: string;
-  newPassword: string;
+  Password: string;
+  ConfirmPassword: string;
 }
 
 export const authApi = {
@@ -91,15 +90,20 @@ export const authApi = {
     }
   },
 
-  resetPassword: async (data: ResetPasswordData) => {
+  resetPassword: async (email: string, data: ResetPasswordData) => {
     try {
-      const response = await api.post('/auth/ResetPassword', data);
-      return response.data;
+      console.log(data, 'Request data for password reset');
+      const response = await api.post(`/auth/ResetPassword?email=${email}`, data);
+      console.log(response, 'Response from password reset API');
+      return response;
+
     } catch (error: any) {
+      // Check if the error has a specific message from the response
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
+      // Default error message if no specific message is found
       throw new Error('Network error. Please check your connection and try again.');
     }
-  },
+  }  
 };

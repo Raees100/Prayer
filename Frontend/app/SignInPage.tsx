@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { authApi } from '../services/api';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const SignInPage=() => {
@@ -17,7 +18,7 @@ const SignInPage=() => {
   React.useEffect(() => {
     if (params?.message) {
       setTimeout(() => {
-        navigation.setParams({ message: undefined });
+        navigation.setParams(undefined);
       }, 5000);
     }
   }, [params?.message]);
@@ -51,7 +52,7 @@ const SignInPage=() => {
         email: email.trim(),
         password: password
       });
-
+     await AsyncStorage.setItem('userToken', response.token);
       router.push('/AllNamaz');
       
     } catch (err: any) {
