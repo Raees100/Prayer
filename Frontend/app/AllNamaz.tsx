@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Text, Image, Dimensions } from 'react-native';
 import UserHeader from '../components/UserHeader';
 import PrayerCard from '../components/PrayerCard';
 import { router } from 'expo-router';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { prayerApi, PrayerRecord } from '@/services/prayerApi';
 
 const { height } = Dimensions.get('window');
 
@@ -25,71 +24,18 @@ const AllNamaz = () => {
     { id: 'esha', name: 'Esha', isCompleted: false, status: '' },
   ]);
 
-  const togglePrayerCompletion = async (prayerId: string) => {
-    const updatedPrayers = prayers.map((prayer) => {
-      if (prayer.id === prayerId) {
-        const updatedPrayer = { ...prayer, isCompleted: !prayer.isCompleted };
-        const updatedStatus = updatedPrayer.isCompleted ? 'completed' : 'pending';
-        updatedPrayer.status = updatedStatus;
-
-        const prayerData: PrayerRecord = {
-          prayerDate: currentDate,
-          fajar: prayers[0].status,
-          zuhr: prayers[1].status,
-          asar: prayers[2].status,
-          maghrib: prayers[3].status,
-          esha: prayers[4].status,
-          userId: 'userId',
-        };
-
-        if (updatedPrayer.isCompleted) {
-          prayerApi.addPrayer(prayerData).then((response) => {
-            console.log('Prayer added successfully:', response);
-          }).catch((error) => {
-            console.error('Error adding prayer:', error.response?.data || error.message);
-          });
-        } else {
-          prayerApi.updatePrayer(prayerData).then((response) => {
-            console.log('Prayer updated successfully:', response);
-          }).catch((error) => {
-            console.error('Error updating prayer:', error.response?.data || error.message);
-          });
-        }
-
-        return updatedPrayer;
-      }
-      return prayer;
-    });
-
+  const togglePrayerCompletion = (prayerId: string) => {
+    const updatedPrayers = prayers.map((prayer) =>
+      prayer.id === prayerId ? { ...prayer, isCompleted: !prayer.isCompleted } : prayer
+    );
     setPrayers(updatedPrayers);
   };
 
-  // Function to handle the Add button press
-  const handleAddPrayer = async () => {
-    // Create a new prayer record to be added
-    const newPrayerData: PrayerRecord = {
-      prayerDate: currentDate,
-      fajar: 'skipped', // Initial status can be 'pending'
-      zuhr: 'skipped',
-      asar: 'skipped',
-      maghrib: 'skipped',
-      esha: 'skipped',
-      userId: 'userId', // Replace with actual user ID if needed
-    };
-
-    // Call the API to add the new prayer
-    prayerApi.addPrayer(newPrayerData)
-      .then((response) => {
-        console.log('New prayer added successfully:', response);
-        // You can update the state if needed to reflect the new prayer
-        setPrayers((prevPrayers) => [
-          ...prevPrayers,
-          { id: 'newId', name: 'New Prayer', isCompleted: false, status: 'pending' },
-        ]);
-      })
-      .catch((error) => {
-        console.error('Error adding new prayer:', error.response?.data || error.message);
-      });
+  const handleAddPrayer = () => {
+    setPrayers((prevPrayers) => [
+      ...prevPrayers,
+      { id: `new${prevPrayers.length + 1}`, name: 'New Prayer', isCompleted: false, status: 'pending' },
+    ]);
   };
 
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
@@ -140,7 +86,6 @@ const AllNamaz = () => {
     </GestureDetector>
   );
 };
-
 
 const styles = StyleSheet.create({
   mainContainer: {

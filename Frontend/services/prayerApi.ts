@@ -94,7 +94,7 @@ export const prayerApi = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error(error.response?.status);
+      throw new Error(`Error: ${error.response?.status || 'Unknown error'}`);
     }
   },
 

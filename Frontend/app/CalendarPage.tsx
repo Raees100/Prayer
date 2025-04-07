@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import PrayerCalendar from '../components/Calendar';
-import { CalendarScreenProps } from '../navigation/types';
 import { useNavigation } from 'expo-router';
+import { prayerApi } from '../services/prayerApi';
 
 interface PrayerDay {
   allPrayersOffered: boolean;
@@ -16,44 +16,44 @@ interface PrayerData {
 const CalendarPage: React.FC = () => {
   const navigation = useNavigation();
   const [prayerData, setPrayerData] = useState<PrayerData>({});
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // This is sample data - replace with your actual prayer tracking data
-    const currentDate = new Date();
-    const dummyData: PrayerData = {};
-    
-    // Generate sample data for the current month
-    for (let i = 1; i <= 31; i++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-      if (date.getMonth() === currentDate.getMonth()) {
-        const dateString = date.toISOString().split('T')[0];
-        // Randomly set some prayers as completed for demonstration
-        dummyData[dateString] = {
-          allPrayersOffered: Math.random() > 0.5,
-          date: dateString,
-        };
-      }
-    }
-    
-    setPrayerData(dummyData);
-  }, []);
+    const fetchPrayerData = async () => {
+      try {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1; // JavaScript months are 0-based
 
-  // Set up navigation options
+        const data = await prayerApi.getPrayerCalendar(year, month);
+        setPrayerData(data);
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to load prayer data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrayerData();
+  }, []); 
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
       headerTitle: 'Prayer Calendar',
       headerTitleAlign: 'center',
-      headerStyle: {
-        backgroundColor: '#ffffff',
-      },
+      headerStyle: { backgroundColor: '#ffffff' },
       headerTintColor: '#000000',
     });
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <PrayerCalendar prayerData={prayerData} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <PrayerCalendar prayerData={prayerData} />
+      )}
     </View>
   );
 };
@@ -66,4 +66,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CalendarPage; 
+export default CalendarPage;
