@@ -38,13 +38,18 @@ api.interceptors.response.use((response: AxiosResponse) => {
 });
 
 export interface PrayerRecord {
-  prayerDate: Date;
+  request: {
+  prayerDate: string,
   fajar: string;
   zuhr: string;
   asar: string;
   maghrib: string;
   esha: string;
-  userId: string;
+  }
+}
+
+export interface CreatePrayerRequest extends PrayerRecord {
+  // Any additional fields needed for the backend (if any)
 }
 
 export interface PrayerResponse {
@@ -62,19 +67,19 @@ export const prayerApi = {
       console.log('Formatted Date:', formattedDate); // Debugging log
       // Send the GET request with the formatted date
       const response = await api.get(`/prayer/by-date/${formattedDate}`);
-      
+
       return response.data;
     } catch (error: any) {
       // Handle 404 - No prayer record found
       if (error.response?.status === 404) {
         return null; // No prayer record found for this date
       }
-      
+
       // Handle any specific error message returned from the backend
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      
+
       // General error handling for other status codes
       throw new Error(`Error: ${error.response?.status || 'Unknown error'}`);
     }
@@ -98,18 +103,22 @@ export const prayerApi = {
     }
   },
 
-  // Add new prayer record
   addPrayer: async (prayer: PrayerRecord) => {
     try {
       const response = await api.post('/prayer', prayer);
-      return response.data;
+      return response.data;  // Return the response data from the backend
     } catch (error: any) {
       if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+        console.error('Error details:', error.response?.data);  // Log the error details for debugging
+        throw new Error(error.response.data.message);  // Show the backend message (e.g., "Unauthorized request")
       }
-      throw new Error(error.response?.status);
+      console.error('Error response:', error.response);  // Log the error response
+      throw new Error(error.response?.status);  // In case the status code is available but no message
     }
   },
+  
+  
+
 
   // Update prayer record
   updatePrayer: async (prayer: PrayerRecord) => {
@@ -118,8 +127,10 @@ export const prayerApi = {
       return response.data;
     } catch (error: any) {
       if (error.response?.data?.message) {
+        console.error('Error details:', error.response?.data);
         throw new Error(error.response.data.message);
       }
+      console.error('Error response:', error.response);
       throw new Error(error.response?.status);
     }
   },

@@ -8,6 +8,7 @@ interface PrayerCardProps {
   onPress: () => void;
   onStatusChange?: (newStatus: string) => void;
   onViewDetails: () => void;
+  children?: React.ReactNode;
 }
 
 const PrayerCard: React.FC<PrayerCardProps> = ({
