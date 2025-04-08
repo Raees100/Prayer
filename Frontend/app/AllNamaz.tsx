@@ -23,7 +23,23 @@ const AllNamaz = () => {
     { id: 'asar', name: 'Asar', isCompleted: false, status: '' },
     { id: 'maghrib', name: 'Maghrib', isCompleted: false, status: '' },
     { id: 'esha', name: 'Esha', isCompleted: false, status: '' },
-  ]); 
+  ]);
+
+  const convertStatusToLabel = (status: number): string => {
+    switch (status) {
+      case 1: return 'On Time';
+      case 2: return 'Qaza';
+      default: return '';
+    }
+  };
+
+  const convertLabelToStatus = (label: string): number => {
+    switch (label) {
+      case 'On Time': return 1;
+      case 'Qaza': return 2;
+      default: return 0;
+    }
+  };
 
   useEffect(() => {
     const fetchExistingRecord = async () => {
@@ -32,8 +48,8 @@ const AllNamaz = () => {
         if (record) {
           setPrayers(prayers.map((prayer) => ({
             ...prayer,
-            status: record.request[prayer.id] || '', 
-            isCompleted: record.request[prayer.id] ? true : false, 
+            status: convertStatusToLabel(record[prayer.id as keyof PrayerRecord]),
+            isCompleted: record[prayer.id as keyof PrayerRecord] !== 0,
           })));
         } else {
           resetPrayers();
@@ -53,7 +69,7 @@ const AllNamaz = () => {
         return {
           ...prayer,
           isCompleted: newIsCompleted,
-          status: newIsCompleted ? prayer.status : '', 
+          status: newIsCompleted ? prayer.status : '',
         };
       }
       return prayer;
@@ -81,25 +97,22 @@ const AllNamaz = () => {
 
   const handleAddPrayer = async () => {
     const prayerData: PrayerRecord = {
-      request: {
-        prayerDate: currentDate.toISOString(),
-        fajar: prayers.find((prayer) => prayer.id === 'fajar')?.status || 'skipped',
-        zuhr: prayers.find((prayer) => prayer.id === 'zuhr')?.status || 'skipped',
-        asar: prayers.find((prayer) => prayer.id === 'asar')?.status || 'skipped',
-        maghrib: prayers.find((prayer) => prayer.id === 'maghrib')?.status || 'skipped',
-        esha: prayers.find((prayer) => prayer.id === 'esha')?.status || 'skipped',
-      }
+      prayerDate: currentDate,
+      fajar: convertLabelToStatus(prayers.find(p => p.id === 'fajar')?.status || ''),
+      zuhr: convertLabelToStatus(prayers.find(p => p.id === 'zuhr')?.status || ''),
+      asar: convertLabelToStatus(prayers.find(p => p.id === 'asar')?.status || ''),
+      maghrib: convertLabelToStatus(prayers.find(p => p.id === 'maghrib')?.status || ''),
+      esha: convertLabelToStatus(prayers.find(p => p.id === 'esha')?.status || ''),
     };
 
     try {
-      const existingRecord = await prayerApi.getPrayerByDate(currentDate); 
+      const existingRecord = await prayerApi.getPrayerByDate(currentDate);
       if (existingRecord) {
         Alert.alert('Duplicate Data', 'Prayer record for today already exists.');
         return;
       }
 
       const result = await prayerApi.addPrayer(prayerData);
-      console.log(result);
       Alert.alert('Success', 'Prayer record added successfully');
     } catch (error) {
       console.error("Error adding prayer data:", error);
@@ -108,30 +121,25 @@ const AllNamaz = () => {
   };
 
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
-    console.log("Swiped left");
     router.push('/prayers/FajarPage');
   });
 
   const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
-    console.log("Swiped Right");
     router.push('/CalendarPage');
   });
 
   const swipeUp = Gesture.Fling().direction(Directions.UP).onEnd(() => {
-    console.log("Swiped Up - Moving to Next Date");
     const nextDate = new Date(currentDate);
     nextDate.setDate(currentDate.getDate() + 1); 
-    setCurrentDate(nextDate); 
-    resetPrayers(); 
+    setCurrentDate(nextDate);
+    resetPrayers();
   });
   
   const swipeDown = Gesture.Fling().direction(Directions.DOWN).onEnd(() => {
-    console.log("Swiped Down - Moving to Previous Date");
     const prevDate = new Date(currentDate);
     prevDate.setDate(currentDate.getDate() - 1); 
-    setCurrentDate(prevDate); 
+    setCurrentDate(prevDate);
   });
-  
 
   return (
     <GestureDetector gesture={Gesture.Race(swipeUp, swipeDown, swipeLeft, swipeRight)}>
@@ -142,7 +150,10 @@ const AllNamaz = () => {
           onMenuPress={() => {}}
           currentDate={currentDate}
         />
-        <Image source={require('../assets/images/cute-boy-moslem-prayer-cartoon.png')} style={styles.image} />
+        <Image 
+          source={require('../assets/images/cute-boy-moslem-prayer-cartoon.png')} 
+          style={styles.image} 
+        />
         <View style={styles.container}>
           <FlatList
             data={prayers}
@@ -160,11 +171,17 @@ const AllNamaz = () => {
             contentContainerStyle={styles.listContainer}
           />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => console.log('Edit button pressed')}>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => console.log('Edit button pressed')}
+            >
               <Text style={styles.buttonText}>Edit</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleAddPrayer}>
-            <Text style={styles.buttonText}>Add</Text>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={handleAddPrayer}
+            >
+              <Text style={styles.buttonText}>Add</Text>
             </TouchableOpacity>
           </View>
         </View>

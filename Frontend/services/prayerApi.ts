@@ -38,14 +38,12 @@ api.interceptors.response.use((response: AxiosResponse) => {
 });
 
 export interface PrayerRecord {
-  request: {
-  prayerDate: string,
-  fajar: string;
-  zuhr: string;
-  asar: string;
-  maghrib: string;
-  esha: string;
-  }
+  prayerDate: Date;
+  fajar: number;
+  zuhr: number;
+  asar: number;
+  maghrib: number;
+  esha: number;
 }
 
 export interface CreatePrayerRequest extends PrayerRecord {
