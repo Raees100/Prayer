@@ -17,8 +17,6 @@ interface Prayer {
 
 const AllNamaz = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [isEditing, setIsEditing] = useState(false);
-  const [existingRecord, setExistingRecord] = useState<PrayerRecord | null>(null);
   const [prayers, setPrayers] = useState<Prayer[]>([
     { id: 'fajar', name: 'Fajar', isCompleted: false, status: '' },
     { id: 'zuhr', name: 'Zuhr', isCompleted: false, status: '' },
@@ -28,18 +26,17 @@ const AllNamaz = () => {
   ]); 
 
   useEffect(() => {
-    // Fetch existing prayer record for the current date when the component mounts or currentDate changes
     const fetchExistingRecord = async () => {
       try {
-        const record = await prayerApi.getPrayerByDate(currentDate); // Get prayer record by date
+        const record = await prayerApi.getPrayerByDate(currentDate);
         if (record) {
-          setExistingRecord(record); // If data exists, store it for editing
           setPrayers(prayers.map((prayer) => ({
             ...prayer,
-            status: record.request[prayer.id] || '', // Map existing status to prayer
-            isCompleted: record.request[prayer.id] ? true : false, // Set completion status
+            status: record.request[prayer.id] || '', 
+            isCompleted: record.request[prayer.id] ? true : false, 
           })));
-          setIsEditing(true); // Mark as editing
+        } else {
+          resetPrayers();
         }
       } catch (error) {
         console.error('Error fetching existing prayer record:', error);
@@ -47,8 +44,7 @@ const AllNamaz = () => {
     };
 
     fetchExistingRecord();
-  }, [currentDate]); // Run when the currentDate changes
-
+  }, [currentDate]);
 
   const togglePrayerCompletion = (prayerId: string) => {
     const updatedPrayers = prayers.map((prayer) => {
@@ -73,15 +69,17 @@ const AllNamaz = () => {
     );
   };
 
-  const handleAddPrayer = async () => {
-    // Validate that all prayers have been marked or skipped
-    const incompletePrayers = prayers.filter((prayer) => !prayer.isCompleted);
-    if (incompletePrayers.length > 0) {
-      Alert.alert('Validation Error', 'Please complete or skip all the prayers before submitting.');
-      return;
-    }
+  const resetPrayers = () => {
+    setPrayers([
+      { id: 'fajar', name: 'Fajar', isCompleted: false, status: '' },
+      { id: 'zuhr', name: 'Zuhr', isCompleted: false, status: '' },
+      { id: 'asar', name: 'Asar', isCompleted: false, status: '' },
+      { id: 'maghrib', name: 'Maghrib', isCompleted: false, status: '' },
+      { id: 'esha', name: 'Esha', isCompleted: false, status: '' },
+    ]);
+  };
 
-    // Prepare prayer data to send to the backend
+  const handleAddPrayer = async () => {
     const prayerData: PrayerRecord = {
       request: {
         prayerDate: currentDate.toISOString(),
@@ -94,32 +92,24 @@ const AllNamaz = () => {
     };
 
     try {
-      if (isEditing && existingRecord) {
-        // If we are editing, call UpdatePrayer API to update the record
-        const result = await prayerApi.updatePrayer(prayerData);
-        console.log(result);
-        Alert.alert('Success', 'Prayer record updated successfully');
-      } else {
-      // Check if prayer data already exists for the current date (mocked API call)
-      const existingRecord = await prayerApi.getPrayerByDate(currentDate); // Check if data exists for the current date
+      const existingRecord = await prayerApi.getPrayerByDate(currentDate); 
       if (existingRecord) {
         Alert.alert('Duplicate Data', 'Prayer record for today already exists.');
-        return; // Exit if data already exists
+        return;
       }
 
-      // Send the prayer data to the backend using the addPrayer API
       const result = await prayerApi.addPrayer(prayerData);
       console.log(result);
       Alert.alert('Success', 'Prayer record added successfully');
-    }
-   } catch (error) {
-      console.error("Error adding or updating prayer data:", error);
+    } catch (error) {
+      console.error("Error adding prayer data:", error);
       Alert.alert('Error', 'There was an issue adding the prayer record. Please try again.');
     }
   };
 
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
     console.log("Swiped left");
+    router.push('/prayers/FajarPage');
   });
 
   const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
@@ -127,8 +117,24 @@ const AllNamaz = () => {
     router.push('/CalendarPage');
   });
 
+  const swipeUp = Gesture.Fling().direction(Directions.UP).onEnd(() => {
+    console.log("Swiped Up - Moving to Next Date");
+    const nextDate = new Date(currentDate);
+    nextDate.setDate(currentDate.getDate() + 1); 
+    setCurrentDate(nextDate); 
+    resetPrayers(); 
+  });
+  
+  const swipeDown = Gesture.Fling().direction(Directions.DOWN).onEnd(() => {
+    console.log("Swiped Down - Moving to Previous Date");
+    const prevDate = new Date(currentDate);
+    prevDate.setDate(currentDate.getDate() - 1); 
+    setCurrentDate(prevDate); 
+  });
+  
+
   return (
-    <GestureDetector gesture={Gesture.Race(swipeLeft, swipeRight)}>
+    <GestureDetector gesture={Gesture.Race(swipeUp, swipeDown, swipeLeft, swipeRight)}>
       <View style={styles.mainContainer}>
         <UserHeader
           username="User Name"
@@ -158,7 +164,7 @@ const AllNamaz = () => {
               <Text style={styles.buttonText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={handleAddPrayer}>
-            <Text style={styles.buttonText}>{isEditing ? 'Update' : 'Add'}</Text>
+            <Text style={styles.buttonText}>Add</Text>
             </TouchableOpacity>
           </View>
         </View>
