@@ -30,6 +30,7 @@ const FajarPage = () => {
   const { isCompleted, status, currentDate } = useLocalSearchParams();
   const { datesArray, currentDateIndex } = useNamaz();
   
+  // Initialize with route params first
   const [prayerStatus, setPrayerStatus] = useState<string>(
     Array.isArray(status) ? status[0] : status || ''
   );
@@ -39,10 +40,13 @@ const FajarPage = () => {
 
   const fetchPrayerStatus = async () => {
     try {
-      const response = await prayerApi.getPrayerByType("Fajar", new Date(currentDate));
-      if (response) {
-        setPrayerStatus(response.status);
-        setPrayerCompleted(response.isCompleted);
+      // Only fetch if we don't have status from route params
+      if (!status || !isCompleted) {
+        const response = await prayerApi.getPrayerByType("fajar", new Date(currentDate as string));
+        if (response) {
+          setPrayerStatus(response.status);
+          setPrayerCompleted(response.isCompleted);
+        }
       }
     } catch (error) {
       console.error("Error fetching prayer status:", error);
@@ -53,11 +57,12 @@ const FajarPage = () => {
     fetchPrayerStatus();
   }, [currentDate]);
 
+
   const swipeLeft = Gesture.Fling()
     .direction(Directions.LEFT)
     .onEnd(() => {
       const currentPrayers = datesArray[currentDateIndex].prayers;
-      runOnJS(handleLeftSwipe)(currentPrayers, currentDate);
+      runOnJS(handleLeftSwipe)(currentPrayers, currentDate as string);
     });
 
   return (

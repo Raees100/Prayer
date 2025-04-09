@@ -87,7 +87,7 @@ export const prayerApi = {
   getPrayerByType: async (prayerType: string, date: Date) => {
     try {
       const response = await api.get(`/prayer/by-type/${prayerType.toLowerCase()}`, {
-        params: { date: date.toISOString() }
+        params: { date: date.toISOString().split('T')[0] } // Send just the date part
       });
       return response.data;
     } catch (error: any) {

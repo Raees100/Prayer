@@ -148,7 +148,7 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
       params: {
         isCompleted: String(prayers[0].isCompleted),
         status: prayers[0].status,
-        currentDate: String(currentDate),
+        currentDate: currentDate.toISOString(),
       },
     });
   }
