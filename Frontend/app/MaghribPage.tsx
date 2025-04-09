@@ -16,7 +16,7 @@ interface Prayer {
 const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
   if (prayers.length > 1) {
     router.push({
-      pathname: `/AsarPage`,
+      pathname: `/EshaPage`,
       params: {
         isCompleted: String(prayers[1].isCompleted),
         status: prayers[1].status,
@@ -26,7 +26,7 @@ const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
   }
 };
 
-const ZuhrPage = () => {
+const MaghribPage = () => {
   const { isCompleted, status, currentDate } = useLocalSearchParams();
   const { datesArray, currentDateIndex } = useNamaz();
   const [prayerStatus, setPrayerStatus] = useState<string>(
@@ -40,7 +40,7 @@ const ZuhrPage = () => {
       try {
         // Only fetch if we don't have status from route params
         if (!status || !isCompleted) {
-          const response = await prayerApi.getPrayerByType("zuhr", new Date(currentDate as string));
+          const response = await prayerApi.getPrayerByType("maghrib", new Date(currentDate as string));
           if (response) {
             setPrayerStatus(response.status);
             setPrayerCompleted(response.isCompleted);
@@ -66,11 +66,12 @@ const ZuhrPage = () => {
   return (
     <GestureDetector gesture={swipeLeft}>
     <PrayerStatusPage
-      prayerName="Zuhr"
+      prayerName="Maghrib"
       isCompleted={prayerCompleted}
       status={prayerStatus}
     />
   </GestureDetector> 
   )
 };
-export default ZuhrPage;
+
+export default MaghribPage;

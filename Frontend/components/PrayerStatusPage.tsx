@@ -8,7 +8,7 @@ import { useDate } from '../context/DateContext';
 interface PrayerStatusPageProps {
   prayerName: string;
   isCompleted: boolean;
-  status: string;
+  status: string; // This should be either 'Qaza', 'On Time', or empty
 }
 
 const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
@@ -41,6 +41,40 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         return require('../assets/icons/fajr.png');
     }
   };
+
+  // Determine what to display based on status and isCompleted
+  const getStatusDisplay = () => {
+    if (!isCompleted) {
+      return {
+        iconColor: '#C70039',
+        checkmark: '✕',
+        bgColor: '#C70039',
+        text: `Skipped ${prayerName}`,
+        borderColor: '#D5B3C3'
+      };
+    }
+    
+    if (status === 'Qaza') {
+      return {
+        iconColor: '#059669',
+        checkmark: '✓',
+        bgColor: '#059669',
+        text: `Qaza ${prayerName}`,
+        borderColor: '#0376387A'
+      };
+    }
+    
+    // Default to On Time
+    return {
+      iconColor: '#059669',
+      checkmark: '✓',
+      bgColor: '#059669',
+      text: `On Time ${prayerName}`,
+      borderColor: '#0376387A'
+    };
+  };
+
+  const statusDisplay = getStatusDisplay();
 
   return (
     <View style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
@@ -87,76 +121,42 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
           </Text>
         </View>
 
-        {!isCompleted ? (
-          <>
-            <View style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: '#FFFFFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 20,
-              borderWidth: 3,
-              borderColor: '#D5B3C3',
-            }}>
-              <View style={{
-                width: 64,
-                height: 64,
-                borderRadius: 32,
-                backgroundColor: '#C70039',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Text style={{ color: '#FFFFFF', fontSize: 32 }}>✕</Text>
-              </View>
-            </View>
-            <Text style={{ 
-              fontSize: 24, 
-              color: '#000000',
-              marginBottom: 130,
-              fontWeight: '500',
-            }}>
-              Skipped {prayerName}
+        <View style={{
+          width: 80,
+          height: 80,
+          borderRadius: 40,
+          backgroundColor: '#FFFFFF',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 20,
+          borderWidth: 3,
+          borderColor: statusDisplay.borderColor,
+        }}>
+          <View style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: statusDisplay.bgColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Text style={{ color: '#FFFFFF', fontSize: 32 }}>
+              {statusDisplay.checkmark}
             </Text>
-          </>
-        ) : (
-          <>
-            <View style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: '#FFFFFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 3,
-              borderColor: '#0376387A',
-            }}>
-              <View style={{
-                width: 64,
-                height: 64,
-                borderRadius: 32,
-                backgroundColor: '#059669',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Text style={{ color: '#FFFFFF', fontSize: 32 }}>✓</Text>
-              </View>
-            </View>
-            <Text style={{ 
-              fontSize: 24, 
-              color: '#000000',
-              marginBottom: 130,
-              fontWeight: '500',
-              paddingTop: 30,
-            }}>
-              {status === 'Qaza' ? `Qaza ${prayerName}` : `On Time ${prayerName}`}
-            </Text>
-          </>
-        )}
+          </View>
+        </View>
+        <Text style={{ 
+          fontSize: 24, 
+          color: '#000000',
+          marginBottom: 130,
+          fontWeight: '500',
+          paddingTop: status === 'Qaza' ? 0 : 30,
+        }}>
+          {statusDisplay.text}
+        </Text>
       </View>
     </View>
   );
 };
 
-export default PrayerStatusPage; 
+export default PrayerStatusPage;
