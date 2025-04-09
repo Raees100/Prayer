@@ -20,18 +20,14 @@ public static class ContractMappings
         };
     }
 
-    public static PrayerRecord MapToPrayerRecord(this UpdatePrayerRequest request, string userId)
+    public static void MapToExistingPrayerRecord(this UpdatePrayerRequest request, PrayerRecord existingRecord)
     {
-        return new PrayerRecord
-        {
-            UserId = userId,
-            PrayerDate = DateTime.SpecifyKind(request.PrayerDate, DateTimeKind.Utc), // Ensure UTC time
-            Fajar = request.Fajar,
-            Zuhr = request.Zuhr,
-            Asar = request.Asar,
-            Maghrib = request.Maghrib,
-            Esha = request.Esha
-        };
+        existingRecord.PrayerDate = DateTime.SpecifyKind(request.PrayerDate, DateTimeKind.Utc); // Optional: Keep or skip
+        existingRecord.Fajar = request.Fajar;
+        existingRecord.Zuhr = request.Zuhr;
+        existingRecord.Asar = request.Asar;
+        existingRecord.Maghrib = request.Maghrib;
+        existingRecord.Esha = request.Esha;
     }
 
     public static PrayerResponse MapToPrayerRecordResponse(this PrayerRecord prayerRecord)

@@ -34,7 +34,6 @@ public class PrayerController : ControllerBase
         return Ok(new { message = result });
     }
 
-
     // Update Daily Prayer Record
     [HttpPut]
     public async Task<IActionResult> UpdatePrayer([FromBody] UpdatePrayerRequest request)
@@ -43,17 +42,14 @@ public class PrayerController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { message = "User not authorized" });
 
-        // Get existing record from DB
         var existingRecord = await _service.GetPrayerByDateAsync(userId, request.PrayerDate);
         if (existingRecord == null)
             return NotFound(new { message = "No prayer record found for this date." });
 
-        // Ensure user can update only their own record
         if (existingRecord.UserId != userId)
             return Forbid();
 
-        // Map incoming request to existing record
-        existingRecord = request.MapToPrayerRecord(userId);
+        request.MapToExistingPrayerRecord(existingRecord);
 
         var result = await _service.UpdatePrayerAsync(existingRecord);
         if (result.Contains("Failed", StringComparison.OrdinalIgnoreCase))
@@ -61,6 +57,7 @@ public class PrayerController : ControllerBase
 
         return Ok(new { message = "Prayer record updated successfully." });
     }
+
 
 
     [HttpGet("all")]

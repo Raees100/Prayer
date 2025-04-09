@@ -4,6 +4,7 @@ namespace Prayer.Contracts.Requests;
 
 public class UpdatePrayerRequest
 {
+    public int Id { get; set; }
     public DateTime PrayerDate { get; set; }
     public PrayerStatus Fajar { get; set; }
     public PrayerStatus Zuhr { get; set; }
