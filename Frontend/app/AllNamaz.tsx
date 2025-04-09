@@ -17,6 +17,8 @@ interface Prayer {
 
 const AllNamaz = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isEditing, setIsEditing] = useState(false);
+const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const [prayers, setPrayers] = useState<Prayer[]>([
     { id: 'fajar', name: 'Fajar', isCompleted: false, status: '' },
     { id: 'zuhr', name: 'Zuhr', isCompleted: false, status: '' },
@@ -95,7 +97,27 @@ const AllNamaz = () => {
     ]);
   };
 
-  const handleAddPrayer = async () => {
+  const handleEditPrayer = async () => {
+    try {
+      const existingRecord = await prayerApi.getPrayerByDate(currentDate);
+      if (existingRecord) {
+        setPrayers(prayers.map((prayer) => ({
+          ...prayer,
+          status: convertStatusToLabel(existingRecord[prayer.id as keyof PrayerRecord]),
+          isCompleted: existingRecord[prayer.id as keyof PrayerRecord] !== 0,
+        })));
+        setExistingRecordId(existingRecord.id);
+        setIsEditing(true);
+      } else {
+        Alert.alert("No Record Found", "There is no record for this date.");
+      }
+    } catch (error) {
+      console.error("Error fetching existing prayer record:", error);
+      Alert.alert("Error", "Could not fetch prayer record.");
+    }
+  };
+  
+  const handleSavePrayer = async () => {
     const prayerData: PrayerRecord = {
       prayerDate: currentDate,
       fajar: convertLabelToStatus(prayers.find(p => p.id === 'fajar')?.status || ''),
@@ -104,22 +126,21 @@ const AllNamaz = () => {
       maghrib: convertLabelToStatus(prayers.find(p => p.id === 'maghrib')?.status || ''),
       esha: convertLabelToStatus(prayers.find(p => p.id === 'esha')?.status || ''),
     };
-
+  
     try {
-      const existingRecord = await prayerApi.getPrayerByDate(currentDate);
-      if (existingRecord) {
-        Alert.alert('Duplicate Data', 'Prayer record for today already exists.');
-        return;
+      if (isEditing && existingRecordId) {
+        await prayerApi.updatePrayer(prayerData);
+        Alert.alert("Success", "Prayer record updated successfully.");
+        setIsEditing(false);
+      } else {
+        await prayerApi.addPrayer(prayerData);
+        Alert.alert("Success", "Prayer record added successfully.");
       }
-
-      const result = await prayerApi.addPrayer(prayerData);
-      Alert.alert('Success', 'Prayer record added successfully');
     } catch (error) {
-      console.error("Error adding prayer data:", error);
-      Alert.alert('Error', 'There was an issue adding the prayer record. Please try again.');
+      console.error("Error saving prayer record:", error);
+      Alert.alert("Error", "There was an issue saving the prayer record.");
     }
   };
-
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
     router.push('/prayers/FajarPage');
   });
@@ -171,18 +192,15 @@ const AllNamaz = () => {
             contentContainerStyle={styles.listContainer}
           />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={styles.button} 
-              onPress={() => console.log('Edit button pressed')}
-            >
-              <Text style={styles.buttonText}>Edit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.button} 
-              onPress={handleAddPrayer}
-            >
-              <Text style={styles.buttonText}>Add</Text>
-            </TouchableOpacity>
+          {!isEditing ? (
+    <TouchableOpacity style={styles.button} onPress={handleEditPrayer}>
+      <Text style={styles.buttonText}>Edit</Text>
+    </TouchableOpacity>
+  ) : null}
+   <TouchableOpacity style={styles.button} onPress={handleSavePrayer}>
+    <Text style={styles.buttonText}>{isEditing ? "Save" : "Add"}</Text>
+  </TouchableOpacity>
+
           </View>
         </View>
       </View>

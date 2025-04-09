@@ -115,9 +115,6 @@ export const prayerApi = {
     }
   },
   
-  
-
-
   // Update prayer record
   updatePrayer: async (prayer: PrayerRecord) => {
     try {
