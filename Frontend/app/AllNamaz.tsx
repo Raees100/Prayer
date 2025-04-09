@@ -5,6 +5,7 @@ import PrayerCard from '../components/PrayerCard';
 import { router } from 'expo-router';
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { prayerApi, PrayerRecord } from '../services/prayerApi';
+import { runOnJS } from 'react-native-reanimated';
 
 const { height } = Dimensions.get('window');
 
@@ -141,34 +142,53 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
       Alert.alert("Error", "There was an issue saving the prayer record.");
     }
   };
-  const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
-    router.push('/prayers/FajarPage');
-  });
-
-  const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
+  const handleLeftSwipe = ()=>{
+    router.push({
+      pathname: '/FajarPage', // Directly pass the string, not an object
+      params: {
+        isCompleted: String(prayers[0].isCompleted),
+        status: prayers[0].status,
+        currentDate: String(currentDate),
+      },
+    });
+  }
+  const handleRightSwipe = ()=>{
     router.push('/CalendarPage');
-  });
-
-  const swipeUp = Gesture.Fling().direction(Directions.UP).onEnd(() => {
+  }
+  const handleUpSwipe = ()=>{
     const nextDate = new Date(currentDate);
     nextDate.setDate(currentDate.getDate() + 1); 
     setCurrentDate(nextDate);
     resetPrayers();
-  });
-  
-  const swipeDown = Gesture.Fling().direction(Directions.DOWN).onEnd(() => {
+  }
+  const handleDownSwipe = ()=>{
     const prevDate = new Date(currentDate);
     prevDate.setDate(currentDate.getDate() - 1); 
     setCurrentDate(prevDate);
+  }
+  const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
+    runOnJS(handleLeftSwipe)()
+  });
+console.log(prayers[0].isCompleted, prayers[0].status, currentDate)
+  const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
+    runOnJS(handleRightSwipe)()
+  });
+
+  const swipeUp = Gesture.Fling().direction(Directions.UP).onEnd(() => {
+    runOnJS(handleUpSwipe)()
+  });
+  
+  const swipeDown = Gesture.Fling().direction(Directions.DOWN).onEnd(() => {
+    runOnJS(handleDownSwipe)()
   });
 
   return (
-    <GestureDetector gesture={Gesture.Race(swipeUp, swipeDown, swipeLeft, swipeRight)}>
+    <GestureDetector gesture= {Gesture.Race(swipeLeft, swipeRight, swipeUp, swipeDown)}>
       <View style={styles.mainContainer}>
         <UserHeader
           username="User Name"
           subtitle="Welcome back!"
-          onMenuPress={() => {}}
+          onMenuPress={() => {router.push('/FajarPage')}}
           currentDate={currentDate}
         />
         <Image 

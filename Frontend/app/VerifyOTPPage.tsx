@@ -106,15 +106,6 @@ const VerifyOTPPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Image 
-          source={require('../assets/images/arrow_back.png')}
-          style={styles.backIcon}
-        />
-      </TouchableOpacity>
 
       <View style={styles.illustrationContainer}>
         <Image 

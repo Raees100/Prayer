@@ -9,6 +9,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DateProvider } from '@/context/DateContext';
+import { NamazProvider } from '@/context/NamazContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -30,8 +32,10 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+    <DateProvider>
+      <NamazProvider>
     <SafeAreaView style={styles.container}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack initialRouteName="SignInPage">
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -43,16 +47,18 @@ export default function RootLayout() {
         <Stack.Screen name="ResetPasswordPage" options={{ headerShown: false }} />
         <Stack.Screen name="SignInPage" options={{ headerShown: false }} />
         <Stack.Screen name="SignUpPage" options={{ headerShown: false }} />
-        <Stack.Screen name="prayers/FajarPage" options={{ headerShown: false }} />
-        <Stack.Screen name="prayer/ZuhrPage" options={{ headerShown: false }} />
-        <Stack.Screen name="prayer/AsarPage" options={{ headerShown: false }} />
-        <Stack.Screen name="prayer/MagribPage" options={{ headerShown: false }} />
-        <Stack.Screen name="prayer/EshaPage" options={{ headerShown: false }} />
+        <Stack.Screen name="FajarPage" options={{ headerShown: false }} />
+        <Stack.Screen name="ZuhrPage" options={{ headerShown: false }} />
+        <Stack.Screen name="AsarPage" options={{ headerShown: false }} />
+        <Stack.Screen name="MagribPage" options={{ headerShown: false }} />
+        <Stack.Screen name="EshaPage" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
-    </GestureHandlerRootView>
     </SafeAreaView>
+    </NamazProvider>
+    </DateProvider>
+    </GestureHandlerRootView>
   );
 }
 

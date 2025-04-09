@@ -53,7 +53,7 @@ const SignInPage=() => {
         password: password
       });
      await AsyncStorage.setItem('userToken', response.token);
-      router.push('/AllNamaz');
+      router.push('/AllNamaz'); // Redirect to the FajarPage after successful login
       
     } catch (err: any) {
       setError(err.message || 'Invalid email or password');
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     width: '100%',
     height: 150,
-    marginTop: 100,
-    marginBottom: 60,
+    marginTop: 70,
+    marginBottom: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },

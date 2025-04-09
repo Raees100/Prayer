@@ -41,18 +41,6 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Image 
-          source={require('../assets/images/arrow_back.png')}
-          style={styles.backIcon}
-          resizeMode="contain"
-        />
-      </TouchableOpacity>
-
       {/* Header Image */}
       <View style={styles.illustrationContainer}>
         <Image 

@@ -44,7 +44,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
-      <View style={{ paddingTop: 64 }}>
+      <View style={{ paddingTop: -50 }}>
         <UserHeader
           username="User name"
           subtitle="Lorem Ipsum"
@@ -57,14 +57,15 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         color: '#000000',
         textAlign: 'center',
         marginVertical: 40,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginTop: -5,
       }}>
         {formatDate(currentDate)}
       </Text>
 
       <PrayerIllustration />
 
-      <View style={{ alignItems: 'center', marginTop: 60 }}>
+      <View style={{ alignItems: 'center', marginTop: 80 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <Image 
             source={getPrayerIcon(prayerName)}
