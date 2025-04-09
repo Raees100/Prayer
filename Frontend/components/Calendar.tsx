@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { Theme, MarkedDates } from 'react-native-calendars/src/types';
 
-interface PrayerDay {
-  allPrayersOffered: boolean;
-  date: string;
-}
-
 interface CalendarProps {
-  prayerData: { [date: string]: PrayerDay };
+  prayerData: { [date: string]: { allPrayersOffered: boolean } };
+  onMonthChange: (month: Date) => void;
+  currentMonth: Date;
 }
 
 interface CustomDayProps {
@@ -18,9 +15,11 @@ interface CustomDayProps {
   state?: string;
 }
 
-const PrayerCalendar: React.FC<CalendarProps> = ({ prayerData }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
+const PrayerCalendar: React.FC<CalendarProps> = ({ 
+  prayerData, 
+  onMonthChange,
+  currentMonth 
+}) => {
   const markedDates: MarkedDates = Object.entries(prayerData).reduce((acc, [date, data]) => {
     const today = new Date();
     const currentDate = new Date(date);
@@ -141,11 +140,6 @@ const PrayerCalendar: React.FC<CalendarProps> = ({ prayerData }) => {
     );
   };
 
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
   return (
     <View style={styles.container}>
       <Calendar
@@ -155,7 +149,7 @@ const PrayerCalendar: React.FC<CalendarProps> = ({ prayerData }) => {
         markingType="custom"
         onMonthChange={(month) => {
           const newDate = new Date(month.timestamp);
-          setCurrentMonth(newDate);
+          onMonthChange(newDate);
         }}
         enableSwipeMonths={true}
         dayComponent={dayComponent}
@@ -201,8 +195,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 12,
     color: '#2d4150',
-    marginTop: 4,
   },
 });
 
-export default PrayerCalendar; 
+export default PrayerCalendar;

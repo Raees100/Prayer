@@ -5,39 +5,49 @@ import { prayerApi } from '../services/prayerApi';
 
 const EshaPage = () => {
   const { isCompleted, status, currentDate } = useLocalSearchParams();
-  const [prayerStatus, setPrayerStatus] = useState<string>(
-      Array.isArray(status) ? status[0] : status || ''
-    );
-    const [prayerCompleted, setPrayerCompleted] = useState<boolean>(
-      Array.isArray(isCompleted) ? isCompleted[0] === "true" : isCompleted === "true"
-    );
+  
+  const [prayerData, setPrayerData] = useState({
+    status: '',
+    isCompleted: false
+  });
 
   const fetchPrayerStatus = async () => {
-      try {
-        // Only fetch if we don't have status from route params
-        if (!status || !isCompleted) {
-          const response = await prayerApi.getPrayerByType("esha", new Date(currentDate as string));
-          if (response) {
-            setPrayerStatus(response.status);
-            setPrayerCompleted(response.isCompleted);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching prayer status:", error);
+    try {
+      if (status && isCompleted) {
+        setPrayerData({
+          status: Array.isArray(status) ? status[0] : status,
+          isCompleted: Array.isArray(isCompleted) 
+            ? isCompleted[0] === "true" 
+            : isCompleted === "true"
+        });
+        return;
       }
-    };
+
+      const dateObj = new Date(currentDate as string);
+      const response = await prayerApi.getPrayerByType("esha", dateObj);
+      
+      if (response) {
+        setPrayerData({
+          status: response.status || '',
+          isCompleted: response.status ? true : false
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching Esha prayer:", error);
+    }
+  };
 
   useEffect(() => {
     fetchPrayerStatus();
   }, [currentDate]);
-  
 
   return (
-    <PrayerStatusPage
-      prayerName="Esha"
-      isCompleted={prayerCompleted}
-      status={prayerStatus}
-    />
-  )
+      <PrayerStatusPage
+        prayerName="Esha"
+        isCompleted={prayerData.isCompleted}
+        status={prayerData.status}
+      />
+  );
 };
+
 export default EshaPage;

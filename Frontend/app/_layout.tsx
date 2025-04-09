@@ -50,7 +50,7 @@ export default function RootLayout() {
         <Stack.Screen name="FajarPage" options={{ headerShown: false }} />
         <Stack.Screen name="ZuhrPage" options={{ headerShown: false }} />
         <Stack.Screen name="AsarPage" options={{ headerShown: false }} />
-        <Stack.Screen name="MagribPage" options={{ headerShown: false }} />
+        <Stack.Screen name="MaghribPage" options={{ headerShown: false }} />
         <Stack.Screen name="EshaPage" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />

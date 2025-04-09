@@ -12,7 +12,6 @@ interface Prayer {
   status: string;
   isCompleted: boolean;
 }
-
 const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
   if (prayers.length > 1) {
     router.push({
@@ -29,48 +28,64 @@ const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
 const ZuhrPage = () => {
   const { isCompleted, status, currentDate } = useLocalSearchParams();
   const { datesArray, currentDateIndex } = useNamaz();
-  const [prayerStatus, setPrayerStatus] = useState<string>(
-      Array.isArray(status) ? status[0] : status || ''
-    );
-    const [prayerCompleted, setPrayerCompleted] = useState<boolean>(
-      Array.isArray(isCompleted) ? isCompleted[0] === "true" : isCompleted === "true"
-    );
+  
+  const [prayerData, setPrayerData] = useState({
+    status: '',
+    isCompleted: false
+  });
 
   const fetchPrayerStatus = async () => {
-      try {
-        // Only fetch if we don't have status from route params
-        if (!status || !isCompleted) {
-          const response = await prayerApi.getPrayerByType("zuhr", new Date(currentDate as string));
-          if (response) {
-            setPrayerStatus(response.status);
-            setPrayerCompleted(response.isCompleted);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching prayer status:", error);
+    try {
+      // First check route params
+      if (status && isCompleted) {
+        setPrayerData({
+          status: Array.isArray(status) ? status[0] : status,
+          isCompleted: Array.isArray(isCompleted) 
+            ? isCompleted[0] === "true" 
+            : isCompleted === "true"
+        });
+        return;
       }
-    };
+
+      // If no params, fetch from API
+      const dateObj = new Date(currentDate as string);
+      const response = await prayerApi.getPrayerByType("zuhr", dateObj);
+      
+      if (response) {
+        setPrayerData({
+          status: response.status || '',
+          isCompleted: !!response.status // Convert to boolean
+        });
+        console.log('Zuhr status:', response.status, 'Completed:', !!response.status);
+      } else {
+        console.log('No Zuhr prayer record found');
+      }
+    } catch (error) {
+      console.error("Error fetching Zuhr prayer:", error);
+      // Optional: Show error to user
+    }
+  };
 
   useEffect(() => {
     fetchPrayerStatus();
   }, [currentDate]);
 
   const swipeLeft = Gesture.Fling()
-        .direction(Directions.LEFT)
-        .onEnd(() => {
-          const currentPrayers = datesArray[currentDateIndex].prayers;
-          runOnJS(handleLeftSwipe)(currentPrayers, currentDate as string);
-        });
-  
+      .direction(Directions.LEFT)
+      .onEnd(() => {
+        const currentPrayers = datesArray[currentDateIndex].prayers;
+        runOnJS(handleLeftSwipe)(currentPrayers, currentDate as string);
+      });
 
   return (
     <GestureDetector gesture={swipeLeft}>
-    <PrayerStatusPage
-      prayerName="Zuhr"
-      isCompleted={prayerCompleted}
-      status={prayerStatus}
-    />
-  </GestureDetector> 
-  )
+      <PrayerStatusPage
+        prayerName="Zuhr"
+        isCompleted={prayerData.isCompleted}
+        status={prayerData.status}
+      />
+    </GestureDetector>
+  );
 };
+
 export default ZuhrPage;

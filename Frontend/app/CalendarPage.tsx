@@ -4,38 +4,43 @@ import PrayerCalendar from '../components/Calendar';
 import { useNavigation } from 'expo-router';
 import { prayerApi } from '../services/prayerApi';
 
-interface PrayerDay {
-  allPrayersOffered: boolean;
+interface CalendarDay {
   date: string;
-}
-
-interface PrayerData {
-  [date: string]: PrayerDay;
+  status: "cross" | "tick" | "";
 }
 
 const CalendarPage: React.FC = () => {
   const navigation = useNavigation();
-  const [prayerData, setPrayerData] = useState<PrayerData>({});
+  const [prayerData, setPrayerData] = useState<Record<string, { allPrayersOffered: boolean }>>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const fetchPrayerData = async (year: number, month: number) => {
+    try {
+      setLoading(true);
+      const data = await prayerApi.getPrayerCalendar(year, month);
+      
+      // Transform backend data to frontend format
+      const transformedData = data.reduce((acc, day) => {
+        acc[day.date] = {
+          allPrayersOffered: day.status === "tick"
+        };
+        return acc;
+      }, {} as Record<string, { allPrayersOffered: boolean }>);
+      
+      setPrayerData(transformedData);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to load prayer data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPrayerData = async () => {
-      try {
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1; // JavaScript months are 0-based
-
-        const data = await prayerApi.getPrayerCalendar(year, month);
-        setPrayerData(data);
-      } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to load prayer data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrayerData();
-  }, []); 
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth() + 1;
+    fetchPrayerData(year, month);
+  }, [currentMonth]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -47,12 +52,20 @@ const CalendarPage: React.FC = () => {
     });
   }, [navigation]);
 
+  const handleMonthChange = (month: Date) => {
+    setCurrentMonth(month);
+  };
+
   return (
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <PrayerCalendar prayerData={prayerData} />
+        <PrayerCalendar 
+          prayerData={prayerData} 
+          onMonthChange={handleMonthChange}
+          currentMonth={currentMonth}
+        />
       )}
     </View>
   );

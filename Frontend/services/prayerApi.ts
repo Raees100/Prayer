@@ -56,6 +56,11 @@ export interface PrayerResponse {
   status: string;
 }
 
+export interface CalendarDay {
+  date: string;
+  status: "cross" | "tick" | "";
+}
+
 export const prayerApi = {
   // Get prayer record for a specific date
   getPrayerByDate: async (date: Date) => {
@@ -133,7 +138,7 @@ export const prayerApi = {
   // Get prayer calendar data
   getPrayerCalendar: async (year: number, month: number) => {
     try {
-      const response = await api.get('/prayer/calendar', {
+      const response = await api.get<CalendarDay[]>('/prayer/calendar', {
         params: { year, month }
       });
       return response.data;
@@ -141,7 +146,7 @@ export const prayerApi = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error(error.response?.status);
+      throw new Error(error.response?.status || 'Failed to fetch calendar data');
     }
   }
 };

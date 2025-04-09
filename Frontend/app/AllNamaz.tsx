@@ -169,7 +169,6 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const swipeLeft = Gesture.Fling().direction(Directions.LEFT).onEnd(() => {
     runOnJS(handleLeftSwipe)()
   });
-console.log(prayers[0].isCompleted, prayers[0].status, currentDate)
   const swipeRight = Gesture.Fling().direction(Directions.RIGHT).onEnd(() => {
     runOnJS(handleRightSwipe)()
   });
