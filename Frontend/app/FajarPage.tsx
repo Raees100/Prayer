@@ -30,33 +30,57 @@ const FajarPage = () => {
   const { isCompleted, status, currentDate } = useLocalSearchParams();
   const { datesArray, currentDateIndex } = useNamaz();
   
-  // Initialize with route params first
-  const [prayerStatus, setPrayerStatus] = useState<string>(
-    Array.isArray(status) ? status[0] : status || ''
-  );
-  const [prayerCompleted, setPrayerCompleted] = useState<boolean>(
-    Array.isArray(isCompleted) ? isCompleted[0] === "true" : isCompleted === "true"
-  );
+  const [prayerData, setPrayerData] = useState({
+    status: '',
+    isCompleted: false
+  });
 
   const fetchPrayerStatus = async () => {
     try {
-      // Only fetch if we don't have status from route params
-      if (!status || !isCompleted) {
-        const response = await prayerApi.getPrayerByType("fajar", new Date(currentDate as string));
-        if (response) {
-          setPrayerStatus(response.status);
-          setPrayerCompleted(response.isCompleted);
-        }
+      // First check route params (for immediate navigation)
+      if (isCompleted !== undefined) {
+        const completed = Array.isArray(isCompleted) 
+          ? isCompleted[0] === "true" 
+          : isCompleted === "true";
+        
+        setPrayerData({
+          status: completed ? (Array.isArray(status) ? status[0] : status || 'On Time') : '',
+          isCompleted: completed
+        });
+        return;
+      }
+
+      // Fetch from API if no params
+      const dateObj = new Date(currentDate as string);
+      const response = await prayerApi.getPrayerByType("fajar", dateObj);
+      
+      if (response) {
+        setPrayerData({
+          status: response.isCompleted ? (response.status || 'On Time') : '',
+          isCompleted: response.isCompleted
+        });
+        console.log('Fajar status:', response.status, 'Completed:', response.isCompleted);
+      } else {
+        // No record found = skipped
+        setPrayerData({
+          status: '',
+          isCompleted: false
+        });
+        console.log('No Fajar prayer record found - marking as skipped');
       }
     } catch (error) {
-      console.error("Error fetching prayer status:", error);
+      console.error("Error fetching Fajar prayer:", error);
+      // Consider it as skipped in case of error
+      setPrayerData({
+        status: '',
+        isCompleted: false
+      });
     }
   };
 
   useEffect(() => {
     fetchPrayerStatus();
   }, [currentDate]);
-
 
   const swipeLeft = Gesture.Fling()
     .direction(Directions.LEFT)
@@ -69,8 +93,8 @@ const FajarPage = () => {
     <GestureDetector gesture={swipeLeft}>
       <PrayerStatusPage
         prayerName="Fajar"
-        isCompleted={prayerCompleted}
-        status={prayerStatus}
+        isCompleted={prayerData.isCompleted}
+        status={prayerData.status}
       />
     </GestureDetector>
   );

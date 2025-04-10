@@ -44,6 +44,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
 
   // Determine what to display based on status and isCompleted
   const getStatusDisplay = () => {
+    // Handle skipped prayers first
     if (!isCompleted) {
       return {
         iconColor: '#C70039',
@@ -53,25 +54,27 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         borderColor: '#D5B3C3'
       };
     }
-    
-    if (status === 'Qaza') {
-      return {
-        iconColor: '#059669',
-        checkmark: '✓',
-        bgColor: '#059669',
-        text: `Qaza ${prayerName}`,
-        borderColor: '#0376387A'
-      };
+  
+    // Handle completed prayers
+    switch (status) {
+      case 'Qaza':
+        return {
+          iconColor: '#059669',
+          checkmark: '✓',
+          bgColor: '#059669',
+          text: `Qaza ${prayerName}`,
+          borderColor: '#0376387A'
+        };
+      case 'On Time':
+      default:
+        return {
+          iconColor: '#059669',
+          checkmark: '✓',
+          bgColor: '#059669',
+          text: `On Time ${prayerName}`,
+          borderColor: '#0376387A'
+        };
     }
-    
-    // Default to On Time
-    return {
-      iconColor: '#059669',
-      checkmark: '✓',
-      bgColor: '#059669',
-      text: `On Time ${prayerName}`,
-      borderColor: '#0376387A'
-    };
   };
 
   const statusDisplay = getStatusDisplay();

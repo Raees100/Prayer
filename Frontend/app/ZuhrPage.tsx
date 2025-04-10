@@ -37,7 +37,7 @@ const ZuhrPage = () => {
   const fetchPrayerStatus = async () => {
     try {
       // First check route params
-      if (status && isCompleted) {
+      if (status && isCompleted !== undefined) {
         setPrayerData({
           status: Array.isArray(status) ? status[0] : status,
           isCompleted: Array.isArray(isCompleted) 
@@ -54,15 +54,24 @@ const ZuhrPage = () => {
       if (response) {
         setPrayerData({
           status: response.status || '',
-          isCompleted: !!response.status // Convert to boolean
+          isCompleted: response.isCompleted // Use the isCompleted flag directly from API
         });
-        console.log('Zuhr status:', response.status, 'Completed:', !!response.status);
+        console.log('Zuhr status:', response.status, 'Completed:', response.isCompleted);
       } else {
-        console.log('No Zuhr prayer record found');
+        // If no record found, consider it as skipped
+        setPrayerData({
+          status: '',
+          isCompleted: false
+        });
+        console.log('No Zuhr prayer record found - marking as skipped');
       }
     } catch (error) {
       console.error("Error fetching Zuhr prayer:", error);
-      // Optional: Show error to user
+      // Consider it as skipped in case of error
+      setPrayerData({
+        status: '',
+        isCompleted: false
+      });
     }
   };
 
