@@ -137,10 +137,13 @@ public class PrayerController : ControllerBase
             var currentDate = new DateTime(year, month, day);
             var prayersForDay = prayerRecords.FirstOrDefault(p => p.PrayerDate.Date == currentDate);
 
+            // Format the currentDate to only include the date part
+            string formattedDate = currentDate.ToString("yyyy-MM-dd");
+
             if (prayersForDay == null)
             {
                 // No prayers recorded for this date, return empty
-                calendarData.Add(new { date = currentDate, status = "" });
+                calendarData.Add(new { date = formattedDate, status = "" });
             }
             else
             {
@@ -152,7 +155,7 @@ public class PrayerController : ControllerBase
 
                 calendarData.Add(new
                 {
-                    date = currentDate,
+                    date = formattedDate,
                     status = hasSkipped ? "cross" : "tick"
                 });
             }
@@ -160,6 +163,5 @@ public class PrayerController : ControllerBase
 
         return Ok(calendarData);
     }
-
 
 }
