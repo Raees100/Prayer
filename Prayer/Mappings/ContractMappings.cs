@@ -35,7 +35,7 @@ public static class ContractMappings
         return new PrayerResponse
         {
             Id = prayerRecord.Id,
-            PrayerDate = prayerRecord.PrayerDate,
+            PrayerDate = prayerRecord.PrayerDate.ToString("yyyy,MM,dd"),
             Fajar = prayerRecord.Fajar.ToString(),
             Zuhr = prayerRecord.Zuhr.ToString(),
             Asar = prayerRecord.Asar.ToString(),

@@ -5,7 +5,7 @@ namespace Prayer.Contracts.Responses;
 public class PrayerResponse
 {
     public int Id { get; set; }
-    public DateTime PrayerDate { get; set; }
+    public string PrayerDate { get; set; }
     public string Fajar { get; set; }
     public string Zuhr { get; set; }
     public string Asar { get; set; }
