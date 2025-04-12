@@ -1,4 +1,5 @@
-﻿using Prayer.Models;
+﻿using Prayer.Contracts.Responses;
+using Prayer.Models;
 using Prayer.Repositories;
 using Prayer.Repositories.Interfaces;
 using Prayer.Services.Interfaces;
@@ -33,10 +34,11 @@ public class PrayerService : IPrayerService
         return isUpdated ? "Prayer Record Updated Successfully" : "Failed to update prayer record.";
     }
 
-    public async Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
+    public async Task<PrayerTypeResponse?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
     {
         return await _repository.GetPrayerByTypeAsync(userId, prayerType, prayerDate);
     }
+
 
     public async Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate)
     {

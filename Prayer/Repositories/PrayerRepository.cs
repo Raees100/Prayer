@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Prayer.Contracts.Responses;
 using Prayer.Data;
 using Prayer.Models;
 using Prayer.Repositories.Interfaces;
@@ -35,7 +36,7 @@ public class PrayerRepository : IPrayerRepository
         }
     }
 
-    public async Task<string?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
+    public async Task<PrayerTypeResponse?> GetPrayerByTypeAsync(string userId, string prayerType, DateTime prayerDate)
     {
         prayerDate = DateTime.SpecifyKind(prayerDate, DateTimeKind.Utc);
 
@@ -45,7 +46,7 @@ public class PrayerRepository : IPrayerRepository
         if (record == null)
             return null;
 
-        return prayerType switch
+        string? status = prayerType.ToLower() switch
         {
             "fajar" => record.Fajar.ToString(),
             "zuhr" => record.Zuhr.ToString(),
@@ -54,7 +55,16 @@ public class PrayerRepository : IPrayerRepository
             "esha" => record.Esha.ToString(),
             _ => null
         };
+
+        var isCompleted = !string.IsNullOrEmpty(status);
+
+        return new PrayerTypeResponse
+        {
+            Status = status ?? "",
+            IsCompleted = isCompleted
+        };
     }
+
 
     public async Task<List<PrayerRecord>> GetPrayerRecordsForMonthAsync(string userId, DateTime startDate, DateTime endDate)
     {

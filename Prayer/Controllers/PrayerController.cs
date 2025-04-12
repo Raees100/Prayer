@@ -112,12 +112,13 @@ public class PrayerController : ControllerBase
 
         var prayerDate = date ?? DateTime.UtcNow.Date;
 
-        var status = await _service.GetPrayerByTypeAsync(userId, prayerType, prayerDate);
-        if (status == null)
+        var result = await _service.GetPrayerByTypeAsync(userId, prayerType, prayerDate);
+        if (result == null)
             return NotFound(new { message = $"No record found for {prayerType} on {prayerDate:yyyy-MM-dd}." });
 
-        return Ok(new { prayerType, date = prayerDate.ToString("yyyy-MM-dd"), status });
+        return Ok(result); // Now includes status + isCompleted
     }
+
 
     [HttpGet("calendar")]
     public async Task<IActionResult> GetPrayerCalendar([FromQuery] int year, [FromQuery] int month)
