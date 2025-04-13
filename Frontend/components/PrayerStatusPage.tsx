@@ -65,7 +65,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
           text: `Qaza ${prayerName}`,
           borderColor: '#0376387A'
         };
-      case 'On Time':
+      case 'OnTime':
       default:
         return {
           iconColor: '#059669',
