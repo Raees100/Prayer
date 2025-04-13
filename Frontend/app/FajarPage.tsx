@@ -37,44 +37,33 @@ const FajarPage = () => {
 
   const fetchPrayerStatus = async () => {
     try {
-      // First check route params (for immediate navigation)
-      if (isCompleted !== undefined) {
-        const completed = Array.isArray(isCompleted) 
-          ? isCompleted[0] === "true" 
-          : isCompleted === "true";
-        
+      if (status && isCompleted !== undefined) {
         setPrayerData({
-          status: completed ? (Array.isArray(status) ? status[0] : status || 'On Time') : '',
-          isCompleted: completed
+          status: Array.isArray(status) ? status[0] : status,
+          isCompleted: Array.isArray(isCompleted) 
+            ? isCompleted[0] === "true" 
+            : isCompleted === "true"
         });
         return;
       }
-
-      // Fetch from API if no params
+  
       const dateObj = new Date(currentDate as string);
-      const response = await prayerApi.getPrayerByType("fajar", dateObj);
-      
-      if (response) {
+      const response = await prayerApi.getPrayerByType("Fajar", dateObj);
+      console.log("API Response:", response);
+  
+      if (!response || !response.status) {
+        console.log("No valid prayer record found. Treating as Skipped.");
+        setPrayerData({ status: 'Skipped', isCompleted: false });
+      } else {
+        console.log("Prayer record found:", response);
         setPrayerData({
-          status: response.isCompleted ? (response.status || 'On Time') : '',
+          status: response.status,
           isCompleted: response.isCompleted
         });
-        console.log('Fajar status:', response.status, 'Completed:', response.isCompleted);
-      } else {
-        // No record found = skipped
-        setPrayerData({
-          status: '',
-          isCompleted: false
-        });
-        console.log('No Fajar prayer record found - marking as skipped');
       }
     } catch (error) {
       console.error("Error fetching Fajar prayer:", error);
-      // Consider it as skipped in case of error
-      setPrayerData({
-        status: '',
-        isCompleted: false
-      });
+      setPrayerData({ status: '', isCompleted: false });
     }
   };
 

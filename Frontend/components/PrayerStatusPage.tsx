@@ -43,9 +43,9 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
   };
 
   const getStatusDisplay = () => {
-    const normalizedStatus = status?.trim().toLowerCase();
+    const normalizedStatus = status;
   
-    if (normalizedStatus === 'skipped') {
+    if (normalizedStatus === 'Skipped') {
       return {
         iconColor: '#C70039',
         checkmark: '✕',
@@ -54,7 +54,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         borderColor: '#D5B3C3'
       };
     } 
-    else if (normalizedStatus === 'ontime') {
+    else if (normalizedStatus === 'OnTime') {
       return {
         iconColor: '#059669',
         checkmark: '✓',
@@ -63,7 +63,16 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         borderColor: '#0376387A'
       };
     } 
-    else if (normalizedStatus === 'qaza') {
+    else if (normalizedStatus === 'On Time') {
+      return {
+        iconColor: '#059669',
+        checkmark: '✓',
+        bgColor: '#059669',
+        text: `OnTime ${prayerName}`,
+        borderColor: '#0376387A'
+      };
+    }
+    else if (normalizedStatus === 'Qaza') {
       return {
         iconColor: '#059669',
         checkmark: '✓',
@@ -74,16 +83,14 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
     }
   
     return {
-      iconColor: '#9CA3AF',
-      checkmark: '?',
-      bgColor: '#9CA3AF',
-      text: `Unknown ${prayerName}`,
-      borderColor: '#D1D5DB'
+      iconColor: '#C70039',
+      checkmark: '✕',
+      bgColor: '#C70039',
+      text: `Skipped ${prayerName}`,
+      borderColor: '#D5B3C3'
     };
   };
   
-  
-
   const statusDisplay = getStatusDisplay();
 
   return (
