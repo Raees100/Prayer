@@ -146,12 +146,12 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
     router.push({
       pathname: '/FajarPage', // Directly pass the string, not an object
       params: {
+        currentDate: currentDate.toISOString(),
         isCompleted: String(prayers[0].isCompleted),
         status: prayers[0].status,
-        currentDate: currentDate.toISOString(),
       },
     });
-  }
+  };
   const handleRightSwipe = ()=>{
     router.push('/CalendarPage');
   }

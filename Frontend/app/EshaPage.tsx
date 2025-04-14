@@ -46,6 +46,7 @@ const EshaPage = () => {
         prayerName="Esha"
         isCompleted={prayerData.isCompleted}
         status={prayerData.status}
+        currentDate={currentDate as string}
       />
   );
 };

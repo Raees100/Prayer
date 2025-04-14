@@ -1,19 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 interface UserHeaderProps {
-  username: string;
   subtitle: string;
   onMenuPress: () => void;
   currentDate?: Date;
 }
 
 const UserHeader: React.FC<UserHeaderProps> = ({
-  username,
   subtitle,
   onMenuPress,
   currentDate,
 }) => {
+  const { userName } = useAuth();
   const formattedDate = currentDate ? new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
@@ -31,7 +31,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({
             />
           </View>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: '600', color: '#000000' }}>{username}</Text>
+            <Text style={{ fontSize: 20, fontWeight: '600', color: '#000000' }}>{userName || 'User'}</Text>
             <Text style={{ color: '#666666' }}>{subtitle}</Text>
           </View>
         </View>

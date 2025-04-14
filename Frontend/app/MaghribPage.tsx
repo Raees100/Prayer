@@ -13,12 +13,12 @@ interface Prayer {
   isCompleted: boolean;
 }
 const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
-  if (prayers.length > 1) {
+  if (prayers.length > 4) {
     router.push({
       pathname: `/EshaPage`,
       params: {
-        isCompleted: String(prayers[1].isCompleted),
-        status: prayers[1].status,
+        isCompleted: String(prayers[4].isCompleted),
+        status: prayers[4].status,
         currentDate: String(currentDate),
       },
     });
@@ -83,6 +83,7 @@ const MaghribPage = () => {
         prayerName="Maghrib"
         isCompleted={prayerData.isCompleted}
         status={prayerData.status}
+        currentDate={currentDate as string}
       />
     </GestureDetector>
   );

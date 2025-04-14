@@ -10,6 +10,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DateProvider } from '@/context/DateContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { NamazProvider } from '@/context/NamazContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -32,6 +33,7 @@ export default function RootLayout() {
   }
 
   return (
+    <AuthProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
     <DateProvider>
       <NamazProvider>
@@ -59,6 +61,7 @@ export default function RootLayout() {
     </NamazProvider>
     </DateProvider>
     </GestureHandlerRootView>
+    </AuthProvider>
   );
 }
 

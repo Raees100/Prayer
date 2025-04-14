@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityInd
 import { authApi } from '../services/api';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
 
 
 const SignInPage=() => {
   const params = useLocalSearchParams();
   const navigation = useNavigation();
+  const { loadUserData } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,15 +50,14 @@ const SignInPage=() => {
       }
 
       setIsSubmitting(true);
-      const response = await authApi.login({
-        email: email.trim(),
-        password: password
-      });
-     await AsyncStorage.setItem('userToken', response.token);
-      router.push('/AllNamaz'); // Redirect to the FajarPage after successful login
+      const response = await authApi.login({ email, password });
+      if (response) {
+        await loadUserData();
+        router.push('/AllNamaz');
+      }
       
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.response?.data?.message || 'Login Failed. Please try again');
     } finally {
       setIsSubmitting(false);
     }

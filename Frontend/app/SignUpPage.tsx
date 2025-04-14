@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-
+import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 import { router } from 'expo-router';
 
 
 const SignUpPage =() => {
+  const { setUserName } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -59,36 +60,27 @@ const SignUpPage =() => {
   };
 
   const handleSignUp = async () => {
-    if (validateForm()) {
-      try {
-        setIsSubmitting(true);
-        await authApi.register({
-          name: name.trim(),
-          email: email.trim(),
-          password: password,
-        });
-        // Registration successful, navigate to sign in
-        router.push({pathname: '/SignInPage', params:{
-          message: 'Registration successful! Please log in.'
-      }});
-      } catch (error: any) {
-        // Handle the error message from the backend
-        const errorMessage = error.message || 'Registration failed. Please try again.';
-        
-        // Set error based on the type of error message
-        if (errorMessage.toLowerCase().includes('email')) {
-          setErrors(prev => ({ ...prev, email: errorMessage }));
-        } else if (errorMessage.toLowerCase().includes('password')) {
-          setErrors(prev => ({ ...prev, password: errorMessage }));
-        } else if (errorMessage.toLowerCase().includes('name')) {
-          setErrors(prev => ({ ...prev, name: errorMessage }));
-        } else {
-          // If it's a general error, show it in the email field
-          setErrors(prev => ({ ...prev, email: errorMessage }));
-        }
-      } finally {
-        setIsSubmitting(false);
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await authApi.register({
+        name,
+        email,
+        password,
+      });
+
+      if (response) {
+        await setUserName(name);
+        router.push('/SignInPage');
       }
+    } catch (error: any) {
+      setErrors(prev => ({
+        ...prev,
+        email: error.response?.data?.message || 'An error occurred during signup'
+      }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

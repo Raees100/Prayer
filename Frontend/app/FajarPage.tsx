@@ -20,7 +20,7 @@ const handleLeftSwipe = (prayers: Prayer[], currentDate: string) => {
       params: {
         isCompleted: String(prayers[1].isCompleted),
         status: prayers[1].status,
-        currentDate: String(currentDate),
+        currentDate: currentDate,
       },
     });
   }
@@ -84,6 +84,7 @@ const FajarPage = () => {
         prayerName="Fajar"
         isCompleted={prayerData.isCompleted}
         status={prayerData.status}
+        currentDate = {currentDate as string}
       />
     </GestureDetector>
   );

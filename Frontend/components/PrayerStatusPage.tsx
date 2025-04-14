@@ -9,14 +9,17 @@ interface PrayerStatusPageProps {
   prayerName: string;
   isCompleted: boolean;
   status: string; // This should be either 'Qaza', 'On Time', or empty
+  currentDate?: string; // Optional prop for current date
 }
 
 const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
   prayerName,
   isCompleted,
   status,
+  currentDate,
 }) => {
-  const { currentDate } = useDate();
+  const { currentDate: contextDate } = useDate();
+  const displayDate = currentDate ? new Date(currentDate) : new Date(contextDate);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -111,7 +114,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         fontWeight: 'bold',
         marginTop: -5,
       }}>
-        {formatDate(currentDate)}
+        {formatDate(displayDate)}
       </Text>
 
       <PrayerIllustration />
