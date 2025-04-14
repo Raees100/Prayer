@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DateProvider } from '@/context/DateContext';
@@ -15,6 +15,8 @@ import { NamazProvider } from '@/context/NamazContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const { width, height } = Dimensions.get('window');
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -34,10 +36,10 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.gestureContainer}>
     <DateProvider>
       <NamazProvider>
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack initialRouteName="SignInPage">
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -66,8 +68,15 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  gestureContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
+    width: width,
+    height: height,
   },
   text: {
     fontSize: 25,
