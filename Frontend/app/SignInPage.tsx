@@ -51,9 +51,13 @@ const SignInPage=() => {
 
       setIsSubmitting(true);
       const response = await authApi.login({ email, password });
-      console.log('Login response:', response);
-      if (response) {
-        //setUserData(response.data.user.user.id, response.data.user.user.name);
+      console.log('Full login response:', JSON.stringify(response, null, 2));
+      if (response && response.token) {
+        // Decode the JWT token to get user info
+        const tokenParts = response.token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        console.log('Decoded token payload:', payload);
+        await setUserData(payload.nameid, payload.given_name);
         await loadUserData();
         router.push('/AllNamaz');
       }

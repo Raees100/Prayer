@@ -57,8 +57,10 @@ export const authApi = {
   login: async (data: LoginData) => {
     try {
       const response = await api.post('/auth/login', data);
+      console.log('API Response:', response.data);
       return response.data;
     } catch (error: any) {
+      console.error('Login error:', error.response?.data);
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }

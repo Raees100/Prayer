@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 
 
 const SignUpPage =() => {
-  const { setUserName } = useAuth();
+  const { setUserData } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -71,7 +71,7 @@ const SignUpPage =() => {
       });
 
       if (response) {
-        await setUserName(name);
+        await setUserData(response.data.user.id, name);
         router.push('/SignInPage');
       }
     } catch (error: any) {

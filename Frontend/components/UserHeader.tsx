@@ -31,7 +31,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({
             />
           </View>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: '600', color: '#000000' }}>{userName || 'User'}</Text>
+            <Text style={{ fontSize: 20, fontWeight: '600', color: '#000000' }}>{userName}</Text>
             <Text style={{ color: '#666666' }}>{subtitle}</Text>
           </View>
         </View>
