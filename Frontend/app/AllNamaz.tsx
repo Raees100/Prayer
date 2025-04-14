@@ -185,7 +185,6 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
     <GestureDetector gesture= {Gesture.Race(swipeLeft, swipeRight, swipeUp, swipeDown)}>
       <View style={styles.mainContainer}>
         <UserHeader
-          username="User Name"
           subtitle="Welcome back!"
           onMenuPress={() => {router.push('/FajarPage')}}
           currentDate={currentDate}
