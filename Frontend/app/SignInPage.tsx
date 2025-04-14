@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 const SignInPage=() => {
   const params = useLocalSearchParams();
   const navigation = useNavigation();
-  const { loadUserData } = useAuth();
+  const { loadUserData, setUserData} = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +51,9 @@ const SignInPage=() => {
 
       setIsSubmitting(true);
       const response = await authApi.login({ email, password });
+      console.log('Login response:', response);
       if (response) {
+        //setUserData(response.data.user.user.id, response.data.user.user.name);
         await loadUserData();
         router.push('/AllNamaz');
       }

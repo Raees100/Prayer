@@ -49,19 +49,22 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
       try {
         const record = await prayerApi.getPrayerByDate(currentDate);
         if (record) {
-          setPrayers(prayers.map((prayer) => ({
-            ...prayer,
-            status: convertStatusToLabel(record[prayer.id as keyof PrayerRecord]),
-            isCompleted: record[prayer.id as keyof PrayerRecord] !== 0,
-          })));
+          setPrayers((prevPrayers) =>
+            prevPrayers.map((prayer) => ({
+              ...prayer,
+              status: record[prayer.id as keyof PrayerRecord] || '',
+              isCompleted: record[prayer.id as keyof PrayerRecord] === 'OnTime',
+            }))
+          );
         } else {
           resetPrayers();
         }
+        console.log(record);
       } catch (error) {
         console.error('Error fetching existing prayer record:', error);
       }
     };
-
+  
     fetchExistingRecord();
   }, [currentDate]);
 
@@ -102,11 +105,14 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
     try {
       const existingRecord = await prayerApi.getPrayerByDate(currentDate);
       if (existingRecord) {
-        setPrayers(prayers.map((prayer) => ({
-          ...prayer,
-          status: convertStatusToLabel(existingRecord[prayer.id as keyof PrayerRecord]),
-          isCompleted: existingRecord[prayer.id as keyof PrayerRecord] !== 0,
-        })));
+        setPrayers((prevPrayers) =>
+          prevPrayers.map((prayer) => ({
+            ...prayer,
+            status: existingRecord[prayer.id as keyof PrayerRecord] || '',
+            isCompleted: existingRecord[prayer.id as keyof PrayerRecord] === 'OnTime',
+          }))
+        );
+       
         setExistingRecordId(existingRecord.id);
         setIsEditing(true);
       } else {

@@ -100,8 +100,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
     <View style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
       <View style={{ paddingTop: -50 }}>
         <UserHeader
-          username="User name"
-          subtitle="Lorem Ipsum"
+          subtitle="Welcome Back!"
           onMenuPress={() => {}}
         />
       </View>
