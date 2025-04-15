@@ -53,11 +53,24 @@ const SignInPage=() => {
       const response = await authApi.login({ email, password });
       console.log('Full login response:', JSON.stringify(response, null, 2));
       if (response && response.token) {
+        // Store the token
+        await AsyncStorage.setItem('userToken', response.token);
         // Decode the JWT token to get user info
         const tokenParts = response.token.split('.');
         const payload = JSON.parse(atob(tokenParts[1]));
         console.log('Decoded token payload:', payload);
-        await setUserData(payload.nameid, payload.given_name);
+        
+        // Get user ID from the correct claim
+        const userId = payload.nameid || payload.sub || payload.userId;
+        const userName = payload.name || payload.given_name || email;
+        
+        if (!userId) {
+          throw new Error('User ID not found in token');
+        }
+
+        // Store the user ID and name
+        await AsyncStorage.setItem('userId', userId);
+        await setUserData(userId, userName);
         await loadUserData();
         router.push('/AllNamaz');
       }

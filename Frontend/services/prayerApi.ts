@@ -17,11 +17,16 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use(async (config: any) => {
-  const token = await AsyncStorage.getItem('userToken'); // Assuming you have a method to get the token
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  } catch (error) {
+    console.error('Error getting token:', error);
+    return Promise.reject(error);
   }
-  return config;
 }, (error: AxiosError) => {
   return Promise.reject(error);
 });
@@ -33,6 +38,11 @@ api.interceptors.response.use((response: AxiosResponse) => {
   if (!error.response) {
     // Network error
     return Promise.reject(new Error('Network error. Please check your connection and try again.'));
+  }
+  if (error.response.status === 401) {
+    // Token expired or invalid
+    AsyncStorage.removeItem('userToken');
+    // You might want to redirect to login here
   }
   return Promise.reject(error);
 });
