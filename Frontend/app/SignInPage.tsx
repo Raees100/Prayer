@@ -209,9 +209,8 @@ const styles = StyleSheet.create({
   illustration1: {
     width: '80%',
     height: '100%',
-    position: 'absolute',
-    marginTop: 100,
-    marginRight: -102,
+    marginTop: -100,
+    marginRight: -100,
   },
   title: {
     fontSize: 32,

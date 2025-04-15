@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { authApi } from '../services/api';
 import { router } from 'expo-router';
+import { Stack } from 'expo-router';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -41,6 +42,17 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.push('/SignInPage')}
+      >
+        <Image 
+          source={require('../assets/images/arrow_back.png')} 
+          style={styles.backIcon}
+        />
+      </TouchableOpacity>
+
       {/* Header Image */}
       <View style={styles.illustrationContainer}>
         <Image 
@@ -65,7 +77,7 @@ const ForgotPasswordPage: React.FC = () => {
       <View style={styles.inputContainer}>
         <TextInput
           style={[styles.input, error ? styles.inputError : null]}
-          placeholder="Email"
+          placeholder="Email /"
           value={email}
           onChangeText={(text) => {
             setEmail(text);
@@ -101,22 +113,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 20,
   },
-  backButton: {
-    marginTop: 20,
-    marginBottom: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    tintColor: '#000000',
-  },
   illustrationContainer: {
     width: '100%',
     height: 150,
-    marginTop: 50,
+    marginTop: 130,
     marginBottom: 50,
     alignItems: 'center',
     justifyContent: 'center',
@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
   illustration1: {
     width: '80%',
     height: '100%',
-    position: 'absolute',
-    marginRight: -122,
+    marginRight: -125,
+    marginTop: -150,
   },
   title: {
     fontSize: 32,
@@ -193,6 +193,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 1,
+  },
+  backIcon: {
+    width: 30,
+    height: 30,
   },
 });
 

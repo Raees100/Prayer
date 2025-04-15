@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { authApi } from '../services/api';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 
 
 const VerifyOTPPage: React.FC = () => {
@@ -106,7 +106,16 @@ const VerifyOTPPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
-
+      <Stack.Screen options={{ headerShown: false }} />
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.push('/ForgotPasswordPage')}
+      >
+        <Image 
+          source={require('../assets/images/arrow_back.png')} 
+          style={styles.backIcon}
+        />
+      </TouchableOpacity>
       <View style={styles.illustrationContainer}>
         <Image 
           source={require('../assets/images/OTP.png')}
@@ -184,16 +193,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    marginTop: 20,
+    marginTop: 40,
     marginBottom: 20,
   },
   backIcon: {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
   },
   illustrationContainer: {
     width: '100%',
-    height: 200,
+    height: 180,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 30,
@@ -213,17 +222,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 50,
   },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 40,
     paddingHorizontal: 20,
   },
   otpInput: {
-    width: 50,
-    height: 50,
+    width: 55,
+    height: 70,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     borderRadius: 8,
@@ -239,7 +248,7 @@ const styles = StyleSheet.create({
   timerText: {
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   button: {
     backgroundColor: '#037638',

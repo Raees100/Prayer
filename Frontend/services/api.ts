@@ -47,10 +47,17 @@ export const authApi = {
       const response = await api.post('/auth/signup', data);
       return response.data;
     } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error);
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
+      } else if (error.response?.status === 400) {
+        throw new Error('Invalid registration data. Please check your information.');
+      } else if (error.response?.status === 500) {
+        throw new Error('Server error. Please try again later.');
+      } else if (!error.response) {
+        throw new Error('Network error. Please check your connection and try again.');
       }
-      throw new Error('Network error. Please check your connection and try again.');
+      throw new Error('An unexpected error occurred. Please try again.');
     }
   },
 

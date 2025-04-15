@@ -1,5 +1,5 @@
 import { authApi } from '@/services/api';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 
@@ -67,7 +67,16 @@ const ResetPasswordPage = () => {
   };
   return (
     <View style={styles.container}>
-
+      <Stack.Screen options={{ headerShown: false }} />
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.push('/VerifyOTPPage')}
+      >
+        <Image 
+          source={require('../assets/images/arrow_back.png')} 
+          style={styles.backIcon}
+        />
+      </TouchableOpacity>
       {/* Header Image */}
       <View style={styles.illustrationContainer}>
         <Image
@@ -171,20 +180,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    marginTop: 20,
+    marginTop: 40,
     marginBottom: 20,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
   },
   backIcon: {
-    width: 24,
-    height: 24,
-    tintColor: '#000000',
+    width: 30,
+    height: 30,
   },
   illustrationContainer: {
     width: '100%',
-    height: 250,
+    height: 180,
     marginTop: 20,
     marginBottom: 40,
     alignItems: 'center',

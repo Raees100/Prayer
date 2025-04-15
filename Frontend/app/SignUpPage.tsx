@@ -70,15 +70,31 @@ const SignUpPage =() => {
         password,
       });
 
-      if (response) {
-        await setUserData(response.data.user.id, name);
+      if (response && response.message === "User registered successfully") {
+        // After successful registration, redirect to sign in
         router.push('/SignInPage');
       }
     } catch (error: any) {
-      setErrors(prev => ({
-        ...prev,
-        email: error.response?.data?.message || 'An error occurred during signup'
-      }));
+      console.error('Signup error:', error);
+      if (error.response?.data?.message) {
+        // Show the specific error from the backend
+        setErrors(prev => ({
+          ...prev,
+          email: error.response.data.message
+        }));
+      } else if (error.message) {
+        // Show the error message from the API service
+        setErrors(prev => ({
+          ...prev,
+          email: error.message
+        }));
+      } else {
+        // Show a generic error message
+        setErrors(prev => ({
+          ...prev,
+          email: 'An error occurred during signup. Please try again.'
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -221,7 +237,7 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     width: '100%',
     height: 150,
-    marginTop: 120,
+    marginTop: 60,
     marginBottom: 45,
     alignItems: 'center',
     justifyContent: 'center',
