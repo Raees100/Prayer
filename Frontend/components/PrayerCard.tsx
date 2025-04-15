@@ -21,6 +21,7 @@ const PrayerCard: React.FC<PrayerCardProps> = ({
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'OnTime':
       case 'On Time':
         return '#22C55E';
       case 'Qaza':
@@ -80,20 +81,20 @@ const PrayerCard: React.FC<PrayerCardProps> = ({
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <TouchableOpacity
-          onPress={() => onStatusChange?.('On Time')}
+          onPress={() => onStatusChange?.('OnTime')}
           style={{
             paddingHorizontal: 12,
             paddingVertical: 6,
             borderRadius: 4,
-            backgroundColor: status === 'On Time' ? '#22C55E' : '#E5E7EB',
+            backgroundColor: (status === 'OnTime' || status === 'On Time') ? '#22C55E' : '#E5E7EB',
           }}
         >
           <Text style={{ 
-            color: status === 'On Time' ? '#FFFFFF' : '#374151',
+            color: (status === 'OnTime' || status === 'On Time') ? '#FFFFFF' : '#374151',
             fontSize: 12,
             fontWeight: '500'
           }}>
-            On Time
+            OnTime
           </Text>
         </TouchableOpacity>
 

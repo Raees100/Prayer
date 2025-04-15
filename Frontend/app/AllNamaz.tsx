@@ -30,7 +30,7 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
 
   const convertStatusToLabel = (status: number): string => {
     switch (status) {
-      case 1: return 'On Time';
+      case 1: return 'OnTime';
       case 2: return 'Qaza';
       default: return '';
     }
@@ -38,9 +38,13 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
 
   const convertLabelToStatus = (label: string): number => {
     switch (label) {
-      case 'On Time': return 1;
-      case 'Qaza': return 2;
-      default: return 0;
+      case 'OnTime':
+      case 'On Time':
+        return 1;
+      case 'Qaza':
+        return 2;
+      default:
+        return 0;
     }
   };
 
@@ -53,7 +57,7 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
             prevPrayers.map((prayer) => ({
               ...prayer,
               status: record[prayer.id as keyof PrayerRecord] || '',
-              isCompleted: record[prayer.id as keyof PrayerRecord] === 'OnTime',
+              isCompleted: record[prayer.id as keyof PrayerRecord] === 'OnTime' || record[prayer.id as keyof PrayerRecord] === 'Qaza',
             }))
           );
         } else {
@@ -86,7 +90,7 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const updatePrayerStatus = (prayerId: string, newStatus: string) => {
     setPrayers((prevPrayers) =>
       prevPrayers.map((prayer) =>
-        prayer.id === prayerId ? { ...prayer, status: newStatus, isCompleted: true } : prayer
+        prayer.id === prayerId ? { ...prayer, status: newStatus, isCompleted: newStatus === 'OnTime' || newStatus === 'Qaza' } : prayer
       )
     );
   };
@@ -109,7 +113,7 @@ const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
           prevPrayers.map((prayer) => ({
             ...prayer,
             status: existingRecord[prayer.id as keyof PrayerRecord] || '',
-            isCompleted: existingRecord[prayer.id as keyof PrayerRecord] === 'OnTime',
+            isCompleted: existingRecord[prayer.id as keyof PrayerRecord] === 'OnTime' || existingRecord[prayer.id as keyof PrayerRecord] === 'Qaza',
           }))
         );
        

@@ -57,7 +57,7 @@ const PrayerStatusPage: React.FC<PrayerStatusPageProps> = ({
         borderColor: '#D5B3C3'
       };
     } 
-    else if (normalizedStatus === 'OnTime') {
+    else if (normalizedStatus === 'OnTime' || normalizedStatus === 'On Time') {
       return {
         iconColor: '#059669',
         checkmark: '✓',
